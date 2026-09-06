@@ -22,6 +22,10 @@ spring:
     suffix: .html
     cache: false
 
+  # Flyway 는 운영(prod)에서만 사용. 로컬/테스트는 JPA create-drop 유지
+  flyway:
+    enabled: false
+
 server:
   port: 8080
 
@@ -120,10 +124,14 @@ spring:
     password: ${DB_PASSWORD:}
     driver-class-name: org.postgresql.Driver
 
+  # 운영 스키마는 Flyway 마이그레이션으로 관리하고, Hibernate 는 검증만 수행
+  flyway:
+    enabled: true
+
   jpa:
-    defer-datasource-initialization: true
+    # defer-datasource-initialization 는 Flyway 와 함께 쓰면 순환 의존이 발생하므로 prod 에선 사용하지 않음
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect

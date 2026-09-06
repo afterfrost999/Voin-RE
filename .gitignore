@@ -1,0 +1,9 @@
+node_modules
+package-lock.json
+.idea/claudeCodeTabState.xml
+# 로컬 환경변수 파일
+.env
+.env.local
+
+# 배포 준비 작업 인계 문서 (작업 완료 후 삭제)
+CLAUDE_HANDOFF.md

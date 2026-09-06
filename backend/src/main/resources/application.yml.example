@@ -1,0 +1,160 @@
+# ============================================================
+#  application.yml 템플릿
+#  이 파일은 커밋됨. 실제 application.yml 도 시크릿이 ${} 참조로 빠져 있어 커밋 대상임.
+#
+#  필요한 환경변수 (로컬=IntelliJ Run > Edit Configurations > Environment variables,
+#                    서버=/etc/voin/voin.env):
+#    - JWT_SECRET            : JWT 서명 키
+#    - KAKAO_CLIENT_ID       : 카카오 앱 REST API 키
+#    - KAKAO_CLIENT_SECRET   : 카카오 앱 시크릿
+#    - OPENAI_API_KEY        : OpenAI API 키 (없으면 GPT 호출 401)
+#    - (선택) KAKAO_REDIRECT_URI, FRONTEND_CALLBACK_URI
+#    - (prod) DB_URL, DB_USERNAME, DB_PASSWORD
+#
+#  환경변수를 안 넣어도 앱은 기동됨(${이름:} 형태라 빈 값 폴백). 단 해당 기능은 동작 안 함.
+# ============================================================
+spring:
+  application:
+    name: voin
+  profiles:
+    default: local
+
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    time-zone: Asia/Seoul
+
+  mvc:
+    static-path-pattern: /**
+
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    cache: false
+
+server:
+  port: 8080
+
+jwt:
+  # 아래 기본값은 실제 운영 시크릿이 아니라, env 미주입 시에도 앱이 기동되게 하는 개발용 더미(HS256 최소 32바이트).
+  # 운영에서는 JWT_SECRET 환경변수로 반드시 덮어쓸 것.
+  secret: ${JWT_SECRET:local-development-insecure-jwt-secret-override-in-production-0123456789}
+  expiration: 86400000
+  refresh-expiration: 604800000
+
+app:
+  frontend-callback-uri: ${FRONTEND_CALLBACK_URI:https://localhost:5174/auth/callback}
+
+kakao:
+  client-id: ${KAKAO_CLIENT_ID:}
+  client-secret: ${KAKAO_CLIENT_SECRET:}
+  redirect-uri: ${KAKAO_REDIRECT_URI:http://localhost:8080/api/auth/kakao/callback}
+  api:
+    base-url: https://kapi.kakao.com
+    auth-url: https://kauth.kakao.com
+
+springdoc:
+  api-docs:
+    path: /api-docs
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    display-request-duration: true
+    groups-order: desc
+    operationsSorter: method
+    tagsSorter: alpha
+    try-it-out-enabled: true
+    filter: true
+  packages-to-scan: com.voin.controller
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json
+
+openai:
+  model: gpt-4o
+  secret-key: ${OPENAI_API_KEY:}
+
+logging:
+  level:
+    root: INFO
+    com.voin: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+---
+# local 프로필 (개발용 — H2 인메모리)
+spring:
+  config:
+    activate:
+      on-profile: local
+
+  datasource:
+    url: jdbc:h2:mem:voin_db;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+  jpa:
+    defer-datasource-initialization: true
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        format_sql: true
+
+---
+# prod 프로필 (운영용 — PostgreSQL)
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/voin_db}
+    username: ${DB_USERNAME:}
+    password: ${DB_PASSWORD:}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    defer-datasource-initialization: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+---
+# test 프로필 (CI/테스트용 — H2)
+spring:
+  config:
+    activate:
+      on-profile: test
+
+  datasource:
+    url: jdbc:h2:mem:testdb
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+  jpa:
+    defer-datasource-initialization: true
+    hibernate:
+      ddl-auto: create-drop
+
+  web:
+    resources:
+      static-locations:
+        - classpath:/static/
+        - file:/home/ubuntu/voin/images/

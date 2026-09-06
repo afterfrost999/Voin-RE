@@ -15,9 +15,6 @@ import NoteIcon from '@/assets/svgs/TodaysDiary/NoteIcon.svg?react';
 import RelationshipIcon from '@/assets/svgs/TodaysDiary/Relationship.svg?react';
 import SearchIcon from '@/assets/svgs/TodaysDiary/SearchIcon.svg?react';
 
-import 공감력화이트Icon from '@/assets/svgs/공감력화이트.svg?react';
-import 리더십화이트Icon from '@/assets/svgs/리더십화이트.svg?react';
-import 이첫레img from '@/assets/images/6c98263fb5c7d5cd2ffe6cfeca32d4eed4fde21e.png'
 
 const Home = () => {
     const { userInfo, actions } = useAuthStore();
@@ -59,35 +56,14 @@ const Home = () => {
     const closeSheet = () => setIsSheetOpen(false);
 
     // 케러셀 슬라이드 요소
+    // NOTE: 코인 통계는 아직 서버에 저장/집계되지 않으므로 빈 상태로 노출한다.
+    //       실제 코인 데이터 연동 후 저장된 통계로 채울 것.
     const carouselSlide = [
         <HomeCoinFind onButtonClick={openSheet} />,
         <HomeCoinStatus
-            title="가장 많이 받은 코인"
-            titleValue="공감력"
-            subtitle={["지금까지 ", "개를 찾아냈어요"]}
-            subtitleNumValue={7}
-            icon={
-                <공감력화이트Icon
-                    className="h-16 w-16"
-                />
-            }
-        />,
-        <HomeCoinStatus
-            title="최근 새로 찾은 코인"
-            titleValue="리더십"
-            subtitle={["새로운 모습을 발견했네요!"]}
-            icon={
-                <리더십화이트Icon
-                    className="h-16 w-16"
-                />
-            }
-        />,
-        <HomeCoinStatus
-            title="코인을 많이 나눈 친구"
-            titleValue="김도청"
-            subtitle={["코인을 ", "회 주고 받았어요"]}
-            subtitleNumValue={5}
-            image={이첫레img}
+            title="나의 장점 코인"
+            titleValue="아직 없어요"
+            subtitle={["일기를 쓰고 첫 코인을 찾아보세요"]}
         />
     ]
 

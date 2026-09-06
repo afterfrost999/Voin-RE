@@ -1,6 +1,7 @@
 package com.voin.util;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -17,8 +18,9 @@ import java.util.UUID;
 @Component
 public class ImageUtil {
 
-    // Ubuntu 서버의 고정 이미지 저장 경로
-    private static final String IMAGE_STORAGE_PATH = "/home/ubuntu/voin/images/profiles";
+    // 이미지 저장 경로(환경별로 다름). 로컬 기본값은 작업 디렉터리 하위, 운영은 application.yml prod 에서 주입
+    @Value("${app.image.base-path:./data/images/profiles}")
+    private String imageStoragePath;
     private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
     /**
@@ -52,7 +54,7 @@ public class ImageUtil {
 
         // 파일명 생성 (UUID + 원본 확장자)
         String fileName = generateFileName(originalFileName, fileType);
-        String filePath = IMAGE_STORAGE_PATH + File.separator + fileName;
+        String filePath = imageStoragePath + File.separator + fileName;
         
         // 파일 저장
         try (FileOutputStream fos = new FileOutputStream(filePath)) {
@@ -69,7 +71,7 @@ public class ImageUtil {
      * 업로드 디렉토리 생성
      */
     private void createUploadDirectoryIfNotExists() throws IOException {
-        Path uploadPath = Paths.get(IMAGE_STORAGE_PATH);
+        Path uploadPath = Paths.get(imageStoragePath);
         if (!Files.exists(uploadPath)) {
             Files.createDirectories(uploadPath);
             log.info("업로드 디렉토리 생성: {}", uploadPath);

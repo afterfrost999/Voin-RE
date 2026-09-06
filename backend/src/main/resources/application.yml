@@ -34,6 +34,9 @@ jwt:
 
 app:
   frontend-callback-uri: ${FRONTEND_CALLBACK_URI:https://localhost:5174/auth/callback}
+  image:
+    # 프로필 이미지 저장 경로. 로컬 기본값은 작업 디렉터리 하위, 운영은 prod 문서에서 재정의
+    base-path: ${APP_IMAGE_BASE_PATH:./data/images/profiles}
 
 kakao:
   client-id: ${KAKAO_CLIENT_ID:}
@@ -125,6 +128,18 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
+  # 저장된 프로필 이미지를 URL 로 서빙하기 위한 정적 리소스 매핑(운영 필수)
+  # Nginx 를 앞단에 두고 /images/ 를 직접 서빙한다면 이 매핑은 제거 가능
+  web:
+    resources:
+      static-locations:
+        - classpath:/static/
+        - file:/home/ubuntu/voin/images/
+
+app:
+  image:
+    base-path: ${APP_IMAGE_BASE_PATH:/home/ubuntu/voin/images/profiles}
+
 # 운영에서는 API 문서를 노출하지 않음 (SecurityConfig 의 경로 차단과 함께 이중 방어)
 springdoc:
   api-docs:
@@ -156,9 +171,3 @@ spring:
     defer-datasource-initialization: true
     hibernate:
       ddl-auto: create-drop
-
-  web:
-    resources:
-      static-locations:
-        - classpath:/static/
-        - file:/home/ubuntu/voin/images/

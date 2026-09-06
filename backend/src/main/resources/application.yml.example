@@ -130,6 +130,13 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
+# 운영에서는 API 문서를 노출하지 않음 (SecurityConfig 의 경로 차단과 함께 이중 방어)
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
 ---
 # test 프로필 (CI/테스트용 — H2)
 spring:

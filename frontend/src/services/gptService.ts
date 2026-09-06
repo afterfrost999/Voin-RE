@@ -1,6 +1,7 @@
 // src/services/gptService.ts
 
 import type { ActivityData } from "@/store/useActivityStore";
+import { authService } from "@/services/authService";
 
 type ClassifyResponse = {
     summary: string;
@@ -15,9 +16,13 @@ type ClassifyResponse = {
  */
 export const classifyText = async (text: string): Promise<Partial<ActivityData>> => {
     try {
+        const token = authService.getStoredToken();
         const response = await fetch('/api/gpt/classify', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
             body: JSON.stringify({ input: text }),
         });
 

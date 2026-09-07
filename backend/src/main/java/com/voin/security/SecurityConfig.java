@@ -29,6 +29,10 @@ public class SecurityConfig {
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
     private final Environment environment;
 
+    // 허용할 CORS 출처(쉼표 구분). 로컬 기본값이며 운영은 APP_CORS_ALLOWED_ORIGINS 환경변수로 주입
+    @org.springframework.beans.factory.annotation.Value("${app.cors.allowed-origins}")
+    private String[] corsAllowedOrigins;
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         // H2 콘솔·Swagger 는 개발용 도구이므로 prod 프로필에서는 노출하지 않음(local/test 에서만 공개)
@@ -85,7 +89,7 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(java.util.List.of("https://localhost:5174"));
+        config.setAllowedOrigins(java.util.Arrays.asList(corsAllowedOrigins));
         config.setAllowedMethods(java.util.List.of("GET","POST","PUT","DELETE","OPTIONS"));
         config.setAllowedHeaders(java.util.List.of("Authorization","Content-Type"));
         config.setAllowCredentials(true);

@@ -1,7 +1,7 @@
 import EnabledButton from '@/assets/svgs/selectShare/EnabledButton.svg?react';
 import DisabledButton from '@/assets/svgs/selectShare/DisabledButton.svg?react';
-import AppShareIcon from '@/assets/svgs/selectShare/AppShareIcon.svg?react';
-import KakaoShareIcon from '@/assets/svgs/selectShare/KakaoShareIcon.svg?react';
+import AppShareIcon from '@/assets/svgs/selectShare/appShareIcon.svg?react';
+import KakaoShareIcon from '@/assets/svgs/selectShare/kakaoShareIcon.svg?react';
 
 import TopNavigation from '@/components/common/TopNavigation';
 import BottomSheet from '@/components/common/BottomSheet';

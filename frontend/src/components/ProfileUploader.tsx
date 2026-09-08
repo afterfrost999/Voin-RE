@@ -3,7 +3,7 @@ import ReactCrop, { type Crop, centerCrop, makeAspectCrop } from 'react-image-cr
 import 'react-image-crop/dist/ReactCrop.css';
 
 import CameraIcon from '@/assets/svgs/ProfileUploader/camera.svg?react';
-import DefaultIcon from '@/assets/svgs/ProfileUploader/default.svg?react';
+import DefaultIcon from '@/assets/svgs/ProfileUploader/Default.svg?react';
 
 
 // 캔버스에 크롭된 이미지를 그리는 헬퍼 함수

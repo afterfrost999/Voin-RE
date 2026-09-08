@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { useActivityStore } from '@/store/useActivityStore';
 
 import HomeIcon from '@/assets/svgs/caseReview/homeIcon.svg?react';
-import HandShakeIcon from '@/assets/svgs/caseReview/handshakeIcon.svg?react';
+import HandShakeIcon from '@/assets/svgs/caseReview/handShakeIcon.svg?react';
 import BagIcon from '@/assets/svgs/caseReview/bagIcon.svg?react';
 import FireIcon from '@/assets/svgs/caseReview/fireIcon.svg?react';
 import ParachuteIcon from '@/assets/svgs/caseReview/parachuteIcon.svg?react';

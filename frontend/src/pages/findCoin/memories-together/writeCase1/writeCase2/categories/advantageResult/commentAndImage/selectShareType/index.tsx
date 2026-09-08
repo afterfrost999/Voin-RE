@@ -144,8 +144,7 @@ const SelectShareType = () => {
                 <div>
                     <FriendSelectList
                         friends={friends}
-                        selectedIndex={selectedIndex}
-                        onSelectFriend={(index) => setSelectedIndex(index)}
+                        onFriendSelect={() => { /* 친구 기능 연동 시 선택된 친구 처리 */ }}
                         navigateTo='/memories-together/final-result'
                     />
                 </div>

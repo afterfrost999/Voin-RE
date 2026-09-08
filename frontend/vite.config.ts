@@ -30,6 +30,11 @@ export default defineConfig({
     isProd && VitePWA({      // dev에서는 SW 완전 비활성화
       registerType: 'autoUpdate',
       devOptions: { enabled: false },
+      workbox: {
+        // 서버로 가야 하는 경로(카카오 로그인/콜백, API, 이미지, 웹소켓)는
+        // 서비스워커의 SPA 폴백(index.html)에서 제외해 네트워크로 통과시킴
+        navigateFallbackDenylist: [/^\/api/, /^\/ws/, /^\/images/],
+      },
       manifest: {
         name: 'Voin', short_name: 'Voin', display: 'standalone',
         theme_color: '#ffffff', lang: 'ko-KR',

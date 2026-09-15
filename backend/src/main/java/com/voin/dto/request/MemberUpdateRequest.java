@@ -17,6 +17,7 @@ public class MemberUpdateRequest {
     @Size(min = 2, max = 50, message = "닉네임은 2자 이상 50자 이하여야 합니다")
     private String nickname;
 
-    @Size(max = 500, message = "프로필 이미지 URL은 500자 이하여야 합니다")
+    // base64 data URL(대용량)로 들어올 수 있어 길이 제약을 두지 않는다.
+    // 서버에서 파일로 저장 후 짧은 URL(/images/profiles/...)로 정규화되어 DB 에 저장됨.
     private String profileImage;
 } 

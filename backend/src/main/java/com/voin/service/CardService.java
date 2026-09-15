@@ -692,24 +692,11 @@ public class CardService {
      * 현재는 테스트를 위해 세션에서 memberId를 조회하거나, 없으면 첫 번째 회원을 반환합니다.
      */
     private Member getCurrentMember() {
-        try {
-            ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
-            HttpServletRequest request = attr.getRequest();
-            HttpSession session = request.getSession(false);
-            
-            if (session != null && session.getAttribute("memberId") != null) {
-                String memberIdStr = (String) session.getAttribute("memberId");
-                UUID memberId = UUID.fromString(memberIdStr);
-                return memberRepository.findById(memberId)
-                        .orElseThrow(() -> new ResourceNotFoundException("Member not found with id: " + memberId));
-            }
-        } catch (Exception e) {
-            log.warn("Failed to get current member from session: {}", e.getMessage());
-        }
-        
-        // 세션에서 찾을 수 없으면 테스트용으로 첫 번째 회원 반환
-        return memberRepository.findAll().stream()
-                .findFirst()
-                .orElseThrow(() -> new ResourceNotFoundException("No members found in database"));
+        // JWT(SecurityContext) 기준으로 현재 로그인 회원을 조회한다.
+        // (이전에는 세션→없으면 '첫 번째 회원'을 반환하는 잘못된 구현이라
+        //  stateless JWT 환경에서 항상 엉뚱한 회원이 조회됐음)
+        UUID memberId = getCurrentMemberId();
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new ResourceNotFoundException("Member not found with id: " + memberId));
     }
 } 

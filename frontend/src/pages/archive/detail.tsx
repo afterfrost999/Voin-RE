@@ -58,7 +58,7 @@ const ArchiveCardDetail = () => {
             {card && (
                 <div className="w-full px-6 flex flex-col overflow-y-auto pb-4">
                     {/* 코인/키워드 헤더 — 사진이 있으면 배경으로, 없으면 코인 색 배경 */}
-                    <div className="w-full rounded-3xl overflow-hidden mt-2 relative">
+                    <div className="w-full shrink-0 rounded-3xl overflow-hidden mt-2 relative">
                         {card.imageUrl ? (
                             <>
                                 <img src={card.imageUrl} alt="" className="absolute inset-0 w-full h-full object-cover" />

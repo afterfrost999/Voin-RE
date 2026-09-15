@@ -127,7 +127,12 @@ const Home = () => {
             )}
             {/* Header */}
             <div className="w-full h-12 px-4 py-2 pt-4 mb-2 flex flex-row items-center">
-                <div className="h-full inline-flex flex-row items-center gap-2">
+                <div
+                    className="h-full inline-flex flex-row items-center gap-2 cursor-pointer"
+                    onClick={() => navigate('/my-info')}
+                    role="button"
+                    aria-label="내 정보"
+                >
                     <ProfileImage src={userInfo?.profileImage}/>
                     {/* 사용자 이름 */}
                     <div className="min-w-fit">

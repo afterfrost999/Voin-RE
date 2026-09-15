@@ -34,6 +34,7 @@ import MemoriesTogetherCommentAndImage from '@/pages/findCoin/memories-together/
 import MemoriesTogetherSelectShareType from '@/pages/findCoin/memories-together/writeCase1/writeCase2/categories/advantageResult/commentAndImage/selectShareType/index';
 import MemoriesTogetherFinalResult from '@/pages/findCoin/memories-together/writeCase1/writeCase2/categories/advantageResult/commentAndImage/selectShareType/finalResult/index';
 import Login from "@/pages/login";
+import MyInfo from '@/pages/myInfo/index';
 
 export interface RouteConfig {
     path: string;
@@ -58,6 +59,7 @@ export const routes: RouteConfig[] = [
     // 보호된 라우트
     { path: '/', component: Home, isProtected: true },
     { path: '/home', component: Home, isProtected: true },
+    { path: '/my-info', component: MyInfo, isProtected: true },
     { path: '/notification', component: Notification, isProtected: true },
 
     // todays

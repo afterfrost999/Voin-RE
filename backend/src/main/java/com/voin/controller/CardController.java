@@ -67,6 +67,16 @@ public class CardController {
     }
 
     /**
+     * 아카이브: 내가 작성한 카드 / 타인이 작성한(받은) 카드 목록
+     */
+    @Operation(summary = "카드 아카이브", description = "내가 작성한 카드와 타인이 작성한(받은) 카드 목록을 함께 반환합니다.")
+    @GetMapping("/archive")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> getArchive() {
+        log.info("Getting card archive");
+        return ResponseEntity.ok(ApiResponse.success("카드 아카이브를 조회했습니다.", cardService.getArchive()));
+    }
+
+    /**
      * 내 카드 목록 조회
      */
     @Operation(summary = "내 카드 목록", description = "현재 사용자가 소유한 모든 카드를 조회합니다.")

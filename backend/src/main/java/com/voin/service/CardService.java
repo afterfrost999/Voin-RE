@@ -118,65 +118,90 @@ public class CardService {
      */
     public List<Map<String, Object>> getMyCardsWithStoryData() {
         Member currentMember = getCurrentMember();
-        List<Card> cards = cardRepository.findByOwnerOrderByCreatedAtDesc(currentMember);
-        
-        return cards.stream().map(card -> {
-            Map<String, Object> cardData = new HashMap<>();
-            
-            // 기본 카드 정보
-            cardData.put("id", card.getId());
-            cardData.put("content", card.getContent());
-            cardData.put("createdAt", card.getCreatedAt());
-            cardData.put("isPublic", card.getIsPublic());
-            cardData.put("isGift", card.getIsGift());
-            cardData.put("situationContext", card.getSituationContext());
-            
-            // 키워드 정보
-            if (card.getKeyword() != null) {
-                Map<String, Object> keywordData = new HashMap<>();
-                keywordData.put("id", card.getKeyword().getId());
-                keywordData.put("name", card.getKeyword().getName());
-                keywordData.put("description", card.getKeyword().getDescription());
-                
-                // 코인 정보
-                if (card.getKeyword().getCoin() != null) {
-                    Map<String, Object> coinData = new HashMap<>();
-                    coinData.put("id", card.getKeyword().getCoin().getId());
-                    coinData.put("name", card.getKeyword().getCoin().getName());
-                    coinData.put("description", card.getKeyword().getCoin().getDescription());
-                    coinData.put("color", card.getKeyword().getCoin().getColor());
-                    keywordData.put("coin", coinData);
-                }
-                
-                cardData.put("keyword", keywordData);
+        return cardRepository.findByOwnerOrderByCreatedAtDesc(currentMember)
+                .stream().map(this::toCardData).collect(Collectors.toList());
+    }
+
+    /**
+     * 🗂️ 아카이브: 내가 작성한 카드 / 타인이 작성한(내가 받은) 카드 목록을 함께 반환.
+     * (친구 기능 도입 전에는 received 가 비어 있음)
+     */
+    public Map<String, Object> getArchive() {
+        Member me = getCurrentMember();
+
+        List<Map<String, Object>> created = cardRepository.findByCreatorOrderByCreatedAtDesc(me)
+                .stream().map(this::toCardData).collect(Collectors.toList());
+
+        List<Map<String, Object>> received = cardRepository.findByOwnerOrderByCreatedAtDesc(me).stream()
+                .filter(c -> c.getCreator() == null || !c.getCreator().getId().equals(me.getId()))
+                .map(this::toCardData)
+                .collect(Collectors.toList());
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("created", created);
+        result.put("received", received);
+        return result;
+    }
+
+    /**
+     * Card 엔티티를 아카이브/목록용 리치 데이터(Map)로 변환.
+     * (키워드·코인·스토리 정보 포함)
+     */
+    private Map<String, Object> toCardData(Card card) {
+        Map<String, Object> cardData = new HashMap<>();
+
+        // 기본 카드 정보
+        cardData.put("id", card.getId());
+        cardData.put("content", card.getContent());
+        cardData.put("createdAt", card.getCreatedAt());
+        cardData.put("isPublic", card.getIsPublic());
+        cardData.put("isGift", card.getIsGift());
+        cardData.put("situationContext", card.getSituationContext());
+
+        // 키워드 정보
+        if (card.getKeyword() != null) {
+            Map<String, Object> keywordData = new HashMap<>();
+            keywordData.put("id", card.getKeyword().getId());
+            keywordData.put("name", card.getKeyword().getName());
+            keywordData.put("description", card.getKeyword().getDescription());
+
+            // 코인 정보
+            if (card.getKeyword().getCoin() != null) {
+                Map<String, Object> coinData = new HashMap<>();
+                coinData.put("id", card.getKeyword().getCoin().getId());
+                coinData.put("name", card.getKeyword().getCoin().getName());
+                coinData.put("description", card.getKeyword().getCoin().getDescription());
+                coinData.put("color", card.getKeyword().getCoin().getColor());
+                keywordData.put("coin", coinData);
             }
-            
-            // Story 정보 (경험 돌아보기의 answer1, answer2 포함)
-            if (card.getStory() != null) {
-                Map<String, Object> storyData = new HashMap<>();
-                storyData.put("id", card.getStory().getId());
-                storyData.put("title", card.getStory().getTitle());
-                storyData.put("content", card.getStory().getContent());
-                storyData.put("type", card.getStory().getStoryType().name());
-                
-                // 경험 돌아보기인 경우 추가 정보 포함
-                if (card.getStory().getStoryType() == StoryType.EXPERIENCE_REFLECTION) {
-                    if (card.getStory().getAnswer1() != null) {
-                        storyData.put("answer1", card.getStory().getAnswer1());
-                    }
-                    if (card.getStory().getAnswer2() != null) {
-                        storyData.put("answer2", card.getStory().getAnswer2());
-                    }
-                    if (card.getStory().getSituationContext() != null) {
-                        storyData.put("situationContext", card.getStory().getSituationContext());
-                    }
+
+            cardData.put("keyword", keywordData);
+        }
+
+        // Story 정보 (경험 돌아보기의 answer1, answer2 포함)
+        if (card.getStory() != null) {
+            Map<String, Object> storyData = new HashMap<>();
+            storyData.put("id", card.getStory().getId());
+            storyData.put("title", card.getStory().getTitle());
+            storyData.put("content", card.getStory().getContent());
+            storyData.put("type", card.getStory().getStoryType().name());
+
+            if (card.getStory().getStoryType() == StoryType.EXPERIENCE_REFLECTION) {
+                if (card.getStory().getAnswer1() != null) {
+                    storyData.put("answer1", card.getStory().getAnswer1());
                 }
-                
-                cardData.put("story", storyData);
+                if (card.getStory().getAnswer2() != null) {
+                    storyData.put("answer2", card.getStory().getAnswer2());
+                }
+                if (card.getStory().getSituationContext() != null) {
+                    storyData.put("situationContext", card.getStory().getSituationContext());
+                }
             }
-            
-            return cardData;
-        }).collect(Collectors.toList());
+
+            cardData.put("story", storyData);
+        }
+
+        return cardData;
     }
 
     @Transactional
@@ -244,9 +269,28 @@ public class CardService {
 
     @Transactional
     public void deleteCard(Long cardId) {
-        Card card = findById(cardId);
+        UUID memberId = getCurrentMemberId();
+        Card card = cardRepository.findById(cardId)
+                .orElseThrow(() -> new ResourceNotFoundException("Card not found with id: " + cardId));
+
+        // 소유자만 삭제 가능
+        if (card.getOwner() == null || !card.getOwner().getId().equals(memberId)) {
+            throw new RuntimeException("해당 카드를 삭제할 권한이 없습니다.");
+        }
+
+        // 코인 보유량 -1 (0 미만으로 내려가지 않게 가드)
+        if (card.getKeyword() != null && card.getKeyword().getCoin() != null) {
+            Long coinId = card.getKeyword().getCoin().getId();
+            memberCoinRepository.findByMemberIdAndCoinId(memberId, coinId).ifPresent(mc -> {
+                if (mc.getCount() != null && mc.getCount() > 0) {
+                    mc.removeOneCoin();
+                    memberCoinRepository.save(mc);
+                }
+            });
+        }
+
         cardRepository.delete(card);
-        log.info("Deleted card: {}", cardId);
+        log.info("Deleted card: {} by member: {}", cardId, memberId);
     }
 
     // ===== 코인 찾기 플로우 메서드들 =====

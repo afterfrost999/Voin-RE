@@ -35,6 +35,10 @@ import MemoriesTogetherSelectShareType from '@/pages/findCoin/memories-together/
 import MemoriesTogetherFinalResult from '@/pages/findCoin/memories-together/writeCase1/writeCase2/categories/advantageResult/commentAndImage/selectShareType/finalResult/index';
 import Login from "@/pages/login";
 import MyInfo from '@/pages/myInfo/index';
+import ArchiveHome from '@/pages/archive/index';
+import ArchiveCategories from '@/pages/archive/categories';
+import ArchiveCardList from '@/pages/archive/cards';
+import ArchiveCardDetail from '@/pages/archive/detail';
 
 export interface RouteConfig {
     path: string;
@@ -61,6 +65,12 @@ export const routes: RouteConfig[] = [
     { path: '/home', component: Home, isProtected: true },
     { path: '/my-info', component: MyInfo, isProtected: true },
     { path: '/notification', component: Notification, isProtected: true },
+
+    // archive
+    { path: '/archive', component: ArchiveHome, isProtected: true },
+    { path: '/archive/:type', component: ArchiveCategories, isProtected: true },
+    { path: '/archive/:type/:coinId', component: ArchiveCardList, isProtected: true },
+    { path: '/archive/:type/:coinId/:cardId', component: ArchiveCardDetail, isProtected: true },
 
     // todays
     { path: '/todays-diary', component: TodaysDiary, isProtected: true },

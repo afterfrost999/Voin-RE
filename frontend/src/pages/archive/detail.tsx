@@ -57,22 +57,30 @@ const ArchiveCardDetail = () => {
 
             {card && (
                 <div className="w-full px-6 flex flex-col overflow-y-auto pb-4">
-                    {/* 코인/키워드 헤더 */}
-                    <div
-                        className="w-full rounded-3xl p-6 flex flex-col items-center text-white mt-2"
-                        style={{ backgroundColor: coin?.color || '#55CFE5' }}
-                    >
-                        <span className="text-[13px] font-medium opacity-90">{coin?.name}</span>
-                        {Icon && (
-                            <span className="my-3 home-svg-white">
-                                <Icon className="h-14 w-14" />
-                            </span>
+                    {/* 코인/키워드 헤더 — 사진이 있으면 배경으로, 없으면 코인 색 배경 */}
+                    <div className="w-full rounded-3xl overflow-hidden mt-2 relative">
+                        {card.imageUrl ? (
+                            <>
+                                <img src={card.imageUrl} alt="" className="absolute inset-0 w-full h-full object-cover" />
+                                {/* 텍스트 가독성을 위한 어두운 오버레이 */}
+                                <div className="absolute inset-0 bg-black/35" />
+                            </>
+                        ) : (
+                            <div className="absolute inset-0" style={{ backgroundColor: coin?.color || '#55CFE5' }} />
                         )}
-                        <span className="text-[22px] font-semibold">{card.keyword?.name}</span>
-                        {card.keyword?.description && (
-                            <span className="text-[13px] font-medium opacity-90 mt-1 text-center">{card.keyword.description}</span>
-                        )}
-                        <span className="text-[12px] opacity-80 mt-3">{fmtDate(card.createdAt)}</span>
+                        <div className="relative p-6 flex flex-col items-center text-white">
+                            <span className="text-[13px] font-medium opacity-90">{coin?.name}</span>
+                            {Icon && (
+                                <span className="my-3 home-svg-white">
+                                    <Icon className="h-14 w-14" />
+                                </span>
+                            )}
+                            <span className="text-[22px] font-semibold">{card.keyword?.name}</span>
+                            {card.keyword?.description && (
+                                <span className="text-[13px] font-medium opacity-90 mt-1 text-center">{card.keyword.description}</span>
+                            )}
+                            <span className="text-[12px] opacity-80 mt-3">{fmtDate(card.createdAt)}</span>
+                        </div>
                     </div>
 
                     {/* 코인이 발견된 순간 (스토리 본문) */}

@@ -15,6 +15,7 @@ export type ArchiveStory = {
 export type ArchiveCard = {
     id: number;
     content: string | null;
+    imageUrl?: string | null;
     createdAt: string;
     isPublic?: boolean;
     isGift?: boolean;

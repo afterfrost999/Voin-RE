@@ -6,6 +6,7 @@ export type SaveDiaryCoinParams = {
     keywordId: number;                                 // 선택된 키워드 ID
     storyType?: 'DAILY_DIARY' | 'EXPERIENCE_REFLECTION';
     comment?: string;
+    imageUrl?: string;                                 // 첨부 이미지(base64 data URL, 선택)
     isPublic?: boolean;
 };
 
@@ -26,6 +27,7 @@ export const saveDiaryCoin = async (params: SaveDiaryCoinParams): Promise<void> 
             content: params.content,
             keywordId: params.keywordId,
             comment: params.comment ?? '',
+            imageUrl: params.imageUrl ?? null,
             isPublic: params.isPublic ?? false,
         }),
     });

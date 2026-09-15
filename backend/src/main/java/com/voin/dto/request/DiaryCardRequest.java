@@ -29,6 +29,9 @@ public class DiaryCardRequest {
     @Schema(description = "한마디 코멘트(선택)", example = "이 순간을 기억하고 싶다")
     private String comment;
 
+    @Schema(description = "첨부 이미지(base64 data URL, 선택)")
+    private String imageUrl;
+
     @Schema(description = "공개 여부", example = "false")
     private Boolean isPublic = false;
 }

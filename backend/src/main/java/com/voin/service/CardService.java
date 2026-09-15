@@ -14,6 +14,7 @@ import com.voin.repository.CoinRepository;
 import com.voin.repository.KeywordRepository;
 import com.voin.repository.MemberRepository;
 import com.voin.repository.MemberCoinRepository;
+import com.voin.util.ImageUtil;
 import com.voin.dto.request.DiaryCardRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -64,6 +65,7 @@ public class CardService {
     private final KeywordRepository keywordRepository;
     private final MemberRepository memberRepository;
     private final MemberCoinRepository memberCoinRepository;
+    private final ImageUtil imageUtil;
 
     public Card findById(Long cardId) {
         return cardRepository.findById(cardId)
@@ -153,6 +155,7 @@ public class CardService {
         // 기본 카드 정보
         cardData.put("id", card.getId());
         cardData.put("content", card.getContent());
+        cardData.put("imageUrl", card.getImageUrl());
         cardData.put("createdAt", card.getCreatedAt());
         cardData.put("isPublic", card.getIsPublic());
         cardData.put("isGift", card.getIsGift());
@@ -557,6 +560,16 @@ public class CardService {
                 .build();
         Story savedStory = storyRepository.save(story);
 
+        // 첨부 이미지가 base64 로 오면 파일로 저장하고 영구 URL 로 변환 (실패해도 카드 생성은 진행)
+        String imageUrl = null;
+        if (request.getImageUrl() != null && request.getImageUrl().startsWith("data:image")) {
+            try {
+                imageUrl = imageUtil.saveBase64Image(request.getImageUrl(), "card.png");
+            } catch (Exception e) {
+                log.warn("카드 이미지 저장 실패(무시하고 진행): {}", e.getMessage());
+            }
+        }
+
         // 3) 카드 저장 (본인이 본인에게 — 자기 장점 발견)
         Card card = Card.builder()
                 .creator(member)
@@ -565,6 +578,7 @@ public class CardService {
                 .story(savedStory)
                 .keyword(keyword)
                 .content(request.getComment())
+                .imageUrl(imageUrl)
                 .isPublic(request.getIsPublic() != null ? request.getIsPublic() : false)
                 .build();
         Card savedCard = cardRepository.save(card);

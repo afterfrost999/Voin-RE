@@ -91,6 +91,12 @@ public class Card extends BaseEntity {
     private String content;
 
     /**
+     * 카드에 첨부된 이미지 URL (선택). 카드 생성 시 올린 사진.
+     */
+    @Column(name = "image_url", length = 500)
+    private String imageUrl;
+
+    /**
      * 카드 공개 여부
      */
     @Column(name = "is_public", nullable = false)

@@ -29,6 +29,7 @@ const CommentAndImage = () => {
                     keywordId: data.keywordId,
                     storyType: 'DAILY_DIARY',
                     comment: trimmed,
+                    imageUrl: data.uploadedImage,
                     isPublic: false,
                 });
             }

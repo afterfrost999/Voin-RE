@@ -158,6 +158,15 @@ springdoc:
   swagger-ui:
     enabled: false
 
+# 운영 로그는 INFO 로 낮춤. (공통 문서의 DEBUG/TRACE SQL 로그가 1GB 서버 디스크를 채우는 것 방지)
+logging:
+  level:
+    root: INFO
+    com.voin: INFO
+    org.springframework.security: WARN
+    org.hibernate.SQL: WARN
+    org.hibernate.type.descriptor.sql.BasicBinder: WARN
+
 ---
 # ============================================================
 #  test 프로필 (CI/테스트용 — H2)

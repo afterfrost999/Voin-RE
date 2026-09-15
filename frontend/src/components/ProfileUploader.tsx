@@ -64,6 +64,7 @@ export default function ProfileUploader({ defaultImage, onChange }: ProfileUploa
     const [crop, setCrop] = useState<Crop>();
     const [completedCrop, setCompletedCrop] = useState<Crop>();
     const [croppedImageUrl, setCroppedImageUrl] = useState<string | null>(null);
+    const [defaultImgError, setDefaultImgError] = useState(false);
 
 
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -112,20 +113,15 @@ export default function ProfileUploader({ defaultImage, onChange }: ProfileUploa
 
         canvasPreview(image, previewCanvas, completedCrop);
 
+        // 영구 저장을 위해 blob URL(세션 한정) 대신 base64 data URL 로 출력한다.
+        // 백엔드가 base64 를 받으면 파일로 저장하고 영구 URL 로 바꿔줌.
+        const dataUrl = previewCanvas.toDataURL('image/png');
+        setCroppedImageUrl(dataUrl);
+        setImgSrc(null); // 모달 닫기
 
-        previewCanvas.toBlob((blob) => {
-            if (!blob) {
-                throw new Error('Failed to create blob');
-            }
-            const url = URL.createObjectURL(blob);
-            setCroppedImageUrl(url);
-            setImgSrc(null); // 모달 닫기
-            
-            // 부모 컴포넌트에 변경사항 알림
-            if (onChange) {
-                onChange(url);
-            }
-        }, 'image/png');
+        if (onChange) {
+            onChange(dataUrl);
+        }
     };
 
 
@@ -143,13 +139,14 @@ export default function ProfileUploader({ defaultImage, onChange }: ProfileUploa
                     {croppedImageUrl ? (
                         <img
                             src={croppedImageUrl}
-                            alt="Cropped Profile"
+                            alt="프로필"
                             className="w-full h-full object-cover"
                         />
-                    ) : defaultImage ? (
+                    ) : defaultImage && !defaultImgError ? (
                         <img
                             src={defaultImage}
-                            alt="Default Profile"
+                            alt="프로필"
+                            onError={() => setDefaultImgError(true)}
                             className="w-full h-full object-cover"
                         />
                     ) : (

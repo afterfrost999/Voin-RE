@@ -7,6 +7,7 @@ import com.voin.exception.ResourceNotFoundException;
 import com.voin.repository.CardRepository;
 import com.voin.repository.FriendRepository;
 import com.voin.repository.MemberRepository;
+import com.voin.util.ImageUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -29,6 +30,7 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final CardRepository cardRepository;
     private final FriendRepository friendRepository;
+    private final ImageUtil imageUtil;
 
     /**
      * 현재 로그인한 사용자 정보 가져오기
@@ -59,9 +61,19 @@ public class MemberService {
         }
         
         if (request.getProfileImage() != null) {
-            member.updateProfileImage(request.getProfileImage());
+            String profileImage = request.getProfileImage();
+            // base64 data URL 이면 파일로 저장하고 영구 URL(/images/profiles/...)로 대체
+            if (profileImage.startsWith("data:image")) {
+                try {
+                    profileImage = imageUtil.saveBase64Image(profileImage, "profile.png");
+                } catch (Exception e) {
+                    log.error("프로필 이미지 저장 실패", e);
+                    throw new RuntimeException("프로필 이미지 저장에 실패했습니다.");
+                }
+            }
+            member.updateProfileImage(profileImage);
         }
-        
+
         Member updatedMember = memberRepository.save(member);
         log.info("Member info updated: id={}", updatedMember.getId());
         

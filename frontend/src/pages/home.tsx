@@ -16,6 +16,7 @@ import RelationshipIcon from '@/assets/svgs/TodaysDiary/Relationship.svg?react';
 import SearchIcon from '@/assets/svgs/TodaysDiary/SearchIcon.svg?react';
 
 import { fetchCoinSummary, type CoinSummary } from '@/services/homeService';
+import { getAdvantageIcon } from '@/icons/advantageIcons';
 
 
 const Home = () => {
@@ -67,6 +68,9 @@ const Home = () => {
 
     // 케러셀 슬라이드 구성: 코인 찾기 + (보유 코인이 있으면 실데이터, 없으면 빈 상태)
     const hasCoins = (summary?.totalCoinCount ?? 0) > 0;
+    // 대표 키워드로 아이콘 매핑 (없으면 null → HomeCoinStatus 가 빈 코인 이미지 표시)
+    const MostOwnedIcon = summary?.mostOwnedCoin?.keyword ? getAdvantageIcon(summary.mostOwnedCoin.keyword) : null;
+    const RecentIcon = summary?.recentCoin?.keyword ? getAdvantageIcon(summary.recentCoin.keyword) : null;
     const carouselSlide = [
         <HomeCoinFind onButtonClick={openSheet} />,
         ...(hasCoins
@@ -77,6 +81,7 @@ const Home = () => {
                         titleValue={summary.mostOwnedCoin.coinName}
                         subtitle={["지금까지 ", "개를 찾아냈어요"]}
                         subtitleNumValue={summary.mostOwnedCoin.count}
+                        icon={MostOwnedIcon ? <span className="home-svg-white"><MostOwnedIcon className="h-16 w-16" /></span> : undefined}
                     />
                 ),
                 summary?.recentCoin && (
@@ -84,6 +89,7 @@ const Home = () => {
                         title="최근 새로 찾은 코인"
                         titleValue={summary.recentCoin.coinName}
                         subtitle={[`'${summary.recentCoin.keyword}' 장점을 발견했어요`]}
+                        icon={RecentIcon ? <span className="home-svg-white"><RecentIcon className="h-16 w-16" /></span> : undefined}
                     />
                 ),
             ].filter(Boolean)

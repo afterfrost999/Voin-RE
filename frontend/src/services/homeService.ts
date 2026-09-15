@@ -4,7 +4,7 @@ import { authService } from "@/services/authService";
 export type CoinSummary = {
     totalCoinCount: number;
     coinTypeCount: number;
-    mostOwnedCoin?: { coinId: number; coinName: string; count: number; color?: string };
+    mostOwnedCoin?: { coinId: number; coinName: string; count: number; color?: string; keyword?: string };
     recentCoin?: { coinId: number; coinName: string; keyword: string; color?: string };
 };
 

@@ -48,7 +48,13 @@ public class HomeService {
         result.put("totalCoinCount", memberCoinRepository.getTotalCoinCountByMemberId(memberId));
         result.put("coinTypeCount", memberCoinRepository.getCoinTypesCountByMemberId(memberId));
 
-        // 가장 많이 보유한 코인
+        // 사용자의 카드(획득 이력)를 최신순으로 로드 — 아이콘용 대표 키워드 산출에 재사용
+        Member member = memberRepository.findById(memberId).orElse(null);
+        List<Card> cards = member != null
+                ? cardRepository.findByOwnerOrderByCreatedAtDesc(member)
+                : List.of();
+
+        // 가장 많이 보유한 코인 (+ 대표 키워드 = 그 코인에서 획득한 가장 최근 카드의 키워드)
         memberCoinRepository.findTopCoinByMemberId(memberId).ifPresent(mc ->
                 coinRepository.findById(mc.getCoinId()).ifPresent(coin -> {
                     Map<String, Object> most = new HashMap<>();
@@ -56,24 +62,26 @@ public class HomeService {
                     most.put("coinName", coin.getName());
                     most.put("count", mc.getCount());
                     most.put("color", coin.getColor());
+                    cards.stream()
+                            .map(Card::getKeyword)
+                            .filter(k -> k != null && k.getCoin() != null
+                                    && k.getCoin().getId().equals(coin.getId()))
+                            .findFirst()
+                            .ifPresent(k -> most.put("keyword", k.getName()));
                     result.put("mostOwnedCoin", most);
                 }));
 
         // 가장 최근에 찾은 코인 (가장 최근 카드의 키워드/코인)
-        Member member = memberRepository.findById(memberId).orElse(null);
-        if (member != null) {
-            List<Card> cards = cardRepository.findByOwnerOrderByCreatedAtDesc(member);
-            if (!cards.isEmpty()) {
-                Keyword kw = cards.get(0).getKeyword();
-                if (kw != null && kw.getCoin() != null) {
-                    Coin coin = kw.getCoin();
-                    Map<String, Object> recent = new HashMap<>();
-                    recent.put("coinId", coin.getId());
-                    recent.put("coinName", coin.getName());
-                    recent.put("keyword", kw.getName());
-                    recent.put("color", coin.getColor());
-                    result.put("recentCoin", recent);
-                }
+        if (!cards.isEmpty()) {
+            Keyword kw = cards.get(0).getKeyword();
+            if (kw != null && kw.getCoin() != null) {
+                Coin coin = kw.getCoin();
+                Map<String, Object> recent = new HashMap<>();
+                recent.put("coinId", coin.getId());
+                recent.put("coinName", coin.getName());
+                recent.put("keyword", kw.getName());
+                recent.put("color", coin.getColor());
+                result.put("recentCoin", recent);
             }
         }
 

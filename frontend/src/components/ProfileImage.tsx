@@ -1,7 +1,7 @@
 // src/components/ProfileImage.tsx
 import React, { useState, useEffect } from 'react';
 import { useAuthStore } from '@/store/useAuthStore';
-import 아미새image from '@/assets/images/9e476176d040dbba92dedbb1e7f3d47eee4b0f12.png';
+import DefaultProfileIcon from '@/components/DefaultProfileIcon';
 
 interface ProfileImageProps {
     /** 우선 사용될 이미지 URL (없으면 전역 userInfo.profileImage 사용) */
@@ -56,13 +56,7 @@ const ProfileImage: React.FC<ProfileImageProps> = ({
                     // referrerPolicy="no-referrer"
                 />
             ) : (
-                <img
-                    src={아미새image}
-                    alt="대체 이미지"
-                    className="h-full w-full object-cover rounded-full"
-                    loading="lazy"
-                    decoding="async"
-                />
+                <DefaultProfileIcon className="h-full w-full rounded-full" />
             )}
         </div>
     );

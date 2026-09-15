@@ -3,7 +3,7 @@ import ReactCrop, { type Crop, centerCrop, makeAspectCrop } from 'react-image-cr
 import 'react-image-crop/dist/ReactCrop.css';
 
 import CameraIcon from '@/assets/svgs/ProfileUploader/camera.svg?react';
-import DefaultIcon from '@/assets/svgs/ProfileUploader/Default.svg?react';
+import DefaultProfileIcon from '@/components/DefaultProfileIcon';
 
 
 // 캔버스에 크롭된 이미지를 그리는 헬퍼 함수
@@ -153,9 +153,7 @@ export default function ProfileUploader({ defaultImage, onChange }: ProfileUploa
                             className="w-full h-full object-cover"
                         />
                     ) : (
-                        <div className='w-32 h-32 bg-gray-200 rounded-full p-8'>
-                            <DefaultIcon className="w-full h-full object-cover" />
-                        </div>
+                        <DefaultProfileIcon className="w-full h-full" />
                     )}
                     <button
                         onClick={() => fileInputRef.current?.click()}

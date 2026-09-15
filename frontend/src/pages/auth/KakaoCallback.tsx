@@ -3,6 +3,7 @@ import { useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/useAuthStore';
 import { authService } from '@/services/authService';
+import type { Member } from '@/services/authService';
 
 const KakaoCallback = () => {
     const navigate = useNavigate();
@@ -28,14 +29,34 @@ const KakaoCallback = () => {
 
         (async () => {
             try {
-                // 1) 토큰 저장 (member는 이후에 채우거나 /me로 동기화)
+                // 1) 토큰 저장
                 authService.storeAuthData(token, null as any);
 
-                // 2) 스토어 인증 상태 동기화
-                if (typeof actions.checkAuthStatus === 'function') {
+                // 2) 서버에서 내 정보(닉네임/프로필사진)를 불러와 스토어를 채움
+                //    (시크릿 창/새 세션처럼 localStorage 가 비어 있어도 프로필이 뜨도록)
+                try {
+                    const resp = await fetch('/api/members/me', {
+                        headers: { Authorization: `Bearer ${token}` },
+                    });
+                    if (resp.ok) {
+                        const api = await resp.json();
+                        const m = api.data;
+                        const member: Member = {
+                            id: m.id,
+                            nickname: m.nickname,
+                            profileImage: m.profileImage ?? null,
+                            kakaoId: m.kakaoId,
+                            friendCode: m.friendCode,
+                            isActive: m.isActive,
+                            createdAt: m.createdAt ?? '',
+                            updatedAt: m.updatedAt ?? '',
+                        };
+                        actions.setAuthData(token, member);
+                    } else {
+                        await actions.checkAuthStatus();
+                    }
+                } catch {
                     await actions.checkAuthStatus();
-                } else if (typeof actions.initialize === 'function') {
-                    await actions.initialize();
                 }
 
                 // 3) 최종 목적지 결정: sessionStorage > type 파라미터 > 기본값(/home)

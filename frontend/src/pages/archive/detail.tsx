@@ -62,14 +62,17 @@ const ArchiveCardDetail = () => {
                         {card.imageUrl ? (
                             <>
                                 <img src={card.imageUrl} alt="" className="absolute inset-0 w-full h-full object-cover" />
-                                {/* 텍스트 가독성을 위한 어두운 오버레이 */}
-                                <div className="absolute inset-0 bg-black/35" />
+                                {/* 텍스트 가독성을 위한 그라데이션 오버레이(아래쪽이 더 진함) */}
+                                <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-black/35 to-black/60" />
                             </>
                         ) : (
                             <div className="absolute inset-0" style={{ backgroundColor: coin?.color || '#55CFE5' }} />
                         )}
-                        <div className="relative p-6 flex flex-col items-center text-white">
-                            <span className="text-[13px] font-medium opacity-90">{coin?.name}</span>
+                        <div
+                            className="relative p-6 flex flex-col items-center text-white"
+                            style={card.imageUrl ? { textShadow: '0 1px 4px rgba(0,0,0,0.55)' } : undefined}
+                        >
+                            <span className="text-[13px] font-medium opacity-95">{coin?.name}</span>
                             {Icon && (
                                 <span className="my-3 home-svg-white">
                                     <Icon className="h-14 w-14" />
@@ -77,9 +80,9 @@ const ArchiveCardDetail = () => {
                             )}
                             <span className="text-[22px] font-semibold">{card.keyword?.name}</span>
                             {card.keyword?.description && (
-                                <span className="text-[13px] font-medium opacity-90 mt-1 text-center">{card.keyword.description}</span>
+                                <span className="text-[13px] font-medium mt-1 text-center">{card.keyword.description}</span>
                             )}
-                            <span className="text-[12px] opacity-80 mt-3">{fmtDate(card.createdAt)}</span>
+                            <span className="text-[12px] mt-3">{fmtDate(card.createdAt)}</span>
                         </div>
                     </div>
 

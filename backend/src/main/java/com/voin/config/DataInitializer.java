@@ -75,10 +75,12 @@ public class DataInitializer {
     }
 
     private void initializeKeywords() {
-        // 기존 키워드 데이터가 잘못되었을 수 있으므로 모두 삭제하고 다시 초기화
+        // 키워드는 최초 1회만 시딩한다.
+        // (이전엔 매 부팅마다 deleteAll 후 재삽입했으나, card 가 keyword 를 참조하면
+        //  FK 제약 위반으로 애플리케이션 기동이 실패하므로 삭제하지 않는다)
         if (keywordRepository.count() > 0) {
-            log.info("Deleting existing keywords to re-initialize with correct mapping...");
-            keywordRepository.deleteAll();
+            log.info("Keywords already initialized");
+            return;
         }
 
         // 저장된 코인들을 알파벳순으로 조회하여 올바르게 매핑

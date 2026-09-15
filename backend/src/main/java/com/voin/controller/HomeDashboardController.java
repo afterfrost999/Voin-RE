@@ -1,8 +1,10 @@
 package com.voin.controller;
 
 import com.voin.dto.response.ApiResponse;
+import com.voin.service.HomeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -13,10 +15,20 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/home")
+@RequiredArgsConstructor
 @Tag(name = "홈 화면 API", description = "홈 화면 슬라이드 및 네비게이션 API")
 public class HomeDashboardController {
 
     private static final Logger logger = LoggerFactory.getLogger(HomeDashboardController.class);
+
+    private final HomeService homeService;
+
+    @Operation(summary = "홈 코인 요약(실데이터)", description = "총 보유 코인 수, 가장 많이 보유한 코인, 최근 찾은 코인을 실제 데이터로 반환합니다.")
+    @GetMapping("/coin-summary")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> getCoinSummary() {
+        logger.info("Getting home coin summary");
+        return ResponseEntity.ok(ApiResponse.success("코인 요약을 조회했습니다.", homeService.getCoinSummary()));
+    }
 
     @Operation(summary = "홈 대시보드 전체 정보", description = "홈 화면의 모든 슬라이드 정보를 한번에 반환합니다.")
     @GetMapping("/dashboard")

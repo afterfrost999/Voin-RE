@@ -15,6 +15,8 @@ import NoteIcon from '@/assets/svgs/TodaysDiary/NoteIcon.svg?react';
 import RelationshipIcon from '@/assets/svgs/TodaysDiary/Relationship.svg?react';
 import SearchIcon from '@/assets/svgs/TodaysDiary/SearchIcon.svg?react';
 
+import { fetchCoinSummary, type CoinSummary } from '@/services/homeService';
+
 
 const Home = () => {
     const { userInfo, actions } = useAuthStore();
@@ -55,16 +57,43 @@ const Home = () => {
     const openSheet = () => setIsSheetOpen(true);
     const closeSheet = () => setIsSheetOpen(false);
 
-    // 케러셀 슬라이드 요소
-    // NOTE: 코인 통계는 아직 서버에 저장/집계되지 않으므로 빈 상태로 노출한다.
-    //       실제 코인 데이터 연동 후 저장된 통계로 채울 것.
+    // 코인 요약(실데이터) 조회
+    const [summary, setSummary] = useState<CoinSummary | null>(null);
+    useEffect(() => {
+        fetchCoinSummary()
+            .then(setSummary)
+            .catch((e) => console.error('코인 요약 조회 실패:', e));
+    }, []);
+
+    // 케러셀 슬라이드 구성: 코인 찾기 + (보유 코인이 있으면 실데이터, 없으면 빈 상태)
+    const hasCoins = (summary?.totalCoinCount ?? 0) > 0;
     const carouselSlide = [
         <HomeCoinFind onButtonClick={openSheet} />,
-        <HomeCoinStatus
-            title="나의 장점 코인"
-            titleValue="아직 없어요"
-            subtitle={["일기를 쓰고 첫 코인을 찾아보세요"]}
-        />
+        ...(hasCoins
+            ? [
+                summary?.mostOwnedCoin && (
+                    <HomeCoinStatus
+                        title="가장 많이 받은 코인"
+                        titleValue={summary.mostOwnedCoin.coinName}
+                        subtitle={["지금까지 ", "개를 찾아냈어요"]}
+                        subtitleNumValue={summary.mostOwnedCoin.count}
+                    />
+                ),
+                summary?.recentCoin && (
+                    <HomeCoinStatus
+                        title="최근 새로 찾은 코인"
+                        titleValue={summary.recentCoin.coinName}
+                        subtitle={[`'${summary.recentCoin.keyword}' 장점을 발견했어요`]}
+                    />
+                ),
+            ].filter(Boolean)
+            : [
+                <HomeCoinStatus
+                    title="나의 장점 코인"
+                    titleValue="아직 없어요"
+                    subtitle={["일기를 쓰고 첫 코인을 찾아보세요"]}
+                />,
+            ]),
     ]
 
     // 모든 SVG 요소를 흰색으로 강제 지정하는 글로벌 스타일 추가

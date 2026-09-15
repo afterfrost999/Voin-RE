@@ -2,6 +2,7 @@ package com.voin.controller;
 
 import com.voin.dto.request.CardCreateRequest;
 import com.voin.dto.request.CardVisibilityUpdateRequest;
+import com.voin.dto.request.DiaryCardRequest;
 import com.voin.dto.response.ApiResponse;
 import com.voin.dto.response.CardResponse;
 import com.voin.entity.Card;
@@ -39,6 +40,18 @@ public class CardController {
         log.info("Creating new card: storyId={}, coinId={}", request.getStoryId(), request.getCoinId());
         CardResponse card = cardService.createCardFromStory(request);
         return ResponseEntity.ok(ApiResponse.success("카드가 생성되었습니다.", card));
+    }
+
+    /**
+     * 일기 기반 코인 획득 (핵심 루프): 스토리·카드 생성 + 코인 보유량 증가
+     */
+    @Operation(summary = "일기로 코인 획득", description = "일기 내용과 선택 키워드로 스토리·카드를 생성하고 코인 보유량을 증가시킵니다.")
+    @PostMapping("/from-diary")
+    public ResponseEntity<ApiResponse<CardResponse>> acquireCoinFromDiary(
+            @Valid @RequestBody DiaryCardRequest request) {
+        log.info("Acquiring coin from diary: keywordId={}", request.getKeywordId());
+        CardResponse card = cardService.acquireCoinFromDiary(request);
+        return ResponseEntity.ok(ApiResponse.success("코인을 획득했습니다.", card));
     }
 
     /**

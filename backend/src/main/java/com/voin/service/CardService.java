@@ -5,6 +5,7 @@ import com.voin.entity.Story;
 import com.voin.entity.Coin;
 import com.voin.entity.Keyword;
 import com.voin.entity.Member;
+import com.voin.entity.MemberCoin;
 import com.voin.constant.StoryType;
 import com.voin.exception.ResourceNotFoundException;
 import com.voin.repository.CardRepository;
@@ -12,6 +13,8 @@ import com.voin.repository.StoryRepository;
 import com.voin.repository.CoinRepository;
 import com.voin.repository.KeywordRepository;
 import com.voin.repository.MemberRepository;
+import com.voin.repository.MemberCoinRepository;
+import com.voin.dto.request.DiaryCardRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -60,6 +63,7 @@ public class CardService {
     private final CoinRepository coinRepository;
     private final KeywordRepository keywordRepository;
     private final MemberRepository memberRepository;
+    private final MemberCoinRepository memberCoinRepository;
 
     public Card findById(Long cardId) {
         return cardRepository.findById(cardId)
@@ -477,8 +481,59 @@ public class CardService {
         
         Card savedCard = cardRepository.save(card);
         log.info("Card created from story: cardId={}, storyId={}", savedCard.getId(), story.getId());
-        
+
         return convertToCardResponse(savedCard, keyword != null ? List.of(keyword) : new ArrayList<>());
+    }
+
+    /**
+     * ✨ 일기 기반 코인 획득 (핵심 루프)
+     *
+     * 일기 본문과 GPT가 분류한 키워드로 한 트랜잭션에서
+     * Story 생성 → Card 생성 → MemberCoin 증가(보유량 +1)를 처리한다.
+     * 지급되는 코인은 키워드가 속한 코인(카테고리)이다.
+     */
+    @Transactional
+    public CardResponse acquireCoinFromDiary(DiaryCardRequest request) {
+        UUID memberId = getCurrentMemberId();
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new RuntimeException("회원을 찾을 수 없습니다."));
+
+        // 1) 키워드 → 코인 도출
+        Keyword keyword = keywordRepository.findById(request.getKeywordId())
+                .orElseThrow(() -> new RuntimeException("키워드를 찾을 수 없습니다."));
+        Coin coin = keyword.getCoin();
+
+        // 2) 스토리(일기 본문) 저장
+        Story story = Story.builder()
+                .memberId(memberId)
+                .title(request.getStoryType() == StoryType.DAILY_DIARY ? "오늘의 일기" : "사례 돌아보기")
+                .content(request.getContent())
+                .storyType(request.getStoryType())
+                .answer1(request.getContent())
+                .build();
+        Story savedStory = storyRepository.save(story);
+
+        // 3) 카드 저장 (본인이 본인에게 — 자기 장점 발견)
+        Card card = Card.builder()
+                .creator(member)
+                .owner(member)
+                .targetMember(member)
+                .story(savedStory)
+                .keyword(keyword)
+                .content(request.getComment())
+                .isPublic(request.getIsPublic() != null ? request.getIsPublic() : false)
+                .build();
+        Card savedCard = cardRepository.save(card);
+
+        // 4) 코인 보유량 증가 (없으면 1개로 신규 생성)
+        memberCoinRepository.findByMemberIdAndCoinId(memberId, coin.getId())
+                .ifPresentOrElse(
+                        mc -> { mc.addOneCoin(); memberCoinRepository.save(mc); },
+                        () -> memberCoinRepository.save(MemberCoin.createWithOneCoin(memberId, coin.getId()))
+                );
+
+        log.info("Coin acquired from diary: member={}, coinId={}, cardId={}", memberId, coin.getId(), savedCard.getId());
+        return convertToCardResponse(savedCard, List.of(keyword));
     }
 
     /**

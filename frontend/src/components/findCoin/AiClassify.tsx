@@ -36,6 +36,8 @@ const AiClassify = ({ nextPath }: AiClassifyProps) => {
                     fullDescription: `코인 설명: ${categoryData.description}`, // API 응답에 fullDescription이 없으므로 임시 처리
                     coinName: categoryData.name,
                     caseName: '오늘의 일기',
+                    coinId: categoryData.id,       // 저장(코인 획득) 시 사용
+                    keywordId: keywordData.id,     // 저장(코인 획득) 시 사용
                 });
 
                 navigate(nextPath);

@@ -14,6 +14,8 @@ export interface ActivityData {
     uploadedImage?: string;
     comment?: string;
     classify?: string;
+    coinId?: number;      // 분류된 카테고리(코인) ID — 저장 시 사용
+    keywordId?: number;   // 분류된 키워드 ID — 저장 시 사용
 }
 
 interface ActivityStore {

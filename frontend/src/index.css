@@ -121,3 +121,15 @@ body {
 .no-scrollbar {
     -ms-overflow-style: none;
 }
+
+/* 좋아요 하트 팝 애니메이션 */
+@keyframes like-pop {
+    0% { transform: scale(1); }
+    25% { transform: scale(1.4); }
+    50% { transform: scale(0.85); }
+    75% { transform: scale(1.15); }
+    100% { transform: scale(1); }
+}
+.like-pop-anim {
+    animation: like-pop 0.4s ease;
+}

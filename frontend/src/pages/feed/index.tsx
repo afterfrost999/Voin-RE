@@ -2,6 +2,7 @@
 import TopNavigation from '@/components/common/TopNavigation';
 import NavigationBar from '@/components/common/NavigationBar';
 import DefaultProfileIcon from '@/components/DefaultProfileIcon';
+import LikeButton from '@/components/LikeButton';
 
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -19,12 +20,6 @@ const Avatar = ({ src, size = 36 }: { src?: string | null; size?: number }) => {
         </div>
     );
 };
-
-const Heart = ({ filled }: { filled: boolean }) => (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill={filled ? '#FF5A78' : 'none'} stroke={filled ? '#FF5A78' : '#B6BAC2'} strokeWidth="2" strokeLinejoin="round">
-        <path d="M12 20.7l-1.1-1C6.1 15.3 3 12.5 3 9.1 3 6.6 4.9 4.8 7.3 4.8c1.4 0 2.7.6 3.5 1.6l1.2 1.4 1.2-1.4c.8-1 2.1-1.6 3.5-1.6 2.4 0 4.3 1.8 4.3 4.3 0 3.4-3.1 6.2-7.9 10.6l-1.1 1z" />
-    </svg>
-);
 
 const Feed = () => {
     const navigate = useNavigate();
@@ -157,10 +152,7 @@ const Feed = () => {
 
                                 {/* 좋아요 */}
                                 <div className="mt-auto flex items-center gap-1.5 pt-1" onClick={(e) => e.stopPropagation()}>
-                                    <button onClick={() => handleLike(card.cardId)} className="inline-flex items-center gap-1.5" aria-label="좋아요">
-                                        <Heart filled={card.likedByMe} />
-                                        <span className={`text-[13px] ${card.likedByMe ? 'text-[#FF5A78]' : 'text-grey-60'}`}>{card.likeCount}</span>
-                                    </button>
+                                    <LikeButton liked={card.likedByMe} count={card.likeCount} onToggle={() => handleLike(card.cardId)} size={20} />
                                 </div>
                             </div>
                         </div>

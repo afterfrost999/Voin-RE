@@ -5,14 +5,9 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { fetchCardView, toggleLike, type CardViewDetail } from '@/services/feedService';
 import { getAdvantageIcon } from '@/icons/advantageIcons';
+import LikeButton from '@/components/LikeButton';
 
 const fmtDate = (iso?: string) => (iso ? iso.slice(0, 10).replace(/-/g, '.') : '');
-
-const Heart = ({ filled }: { filled: boolean }) => (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill={filled ? '#FF5A78' : 'none'} stroke={filled ? '#FF5A78' : '#B6BAC2'} strokeWidth="2" strokeLinejoin="round">
-        <path d="M12 20.7l-1.1-1C6.1 15.3 3 12.5 3 9.1 3 6.6 4.9 4.8 7.3 4.8c1.4 0 2.7.6 3.5 1.6l1.2 1.4 1.2-1.4c.8-1 2.1-1.6 3.5-1.6 2.4 0 4.3 1.8 4.3 4.3 0 3.4-3.1 6.2-7.9 10.6l-1.1 1z" />
-    </svg>
-);
 
 const FeedDetail = () => {
     const navigate = useNavigate();
@@ -106,10 +101,7 @@ const FeedDetail = () => {
 
                     {/* 좋아요 */}
                     <div className="w-full mt-6 flex items-center gap-2">
-                        <button onClick={handleLike} className="inline-flex items-center gap-2" aria-label="좋아요">
-                            <Heart filled={liked} />
-                            <span className={`text-[15px] ${liked ? 'text-[#FF5A78]' : 'text-grey-60'}`}>{likeCount}</span>
-                        </button>
+                        <LikeButton liked={liked} count={likeCount} onToggle={handleLike} size={26} />
                     </div>
                 </div>
             )}

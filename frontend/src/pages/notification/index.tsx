@@ -1,36 +1,66 @@
-// import NotificationList from "@/components/NotificationList";
-import NotificationItem from "@/components/notification/NotificationItem";
-import { Link } from 'react-router-dom';
+// src/pages/notification/index.tsx — 알림 목록 (실데이터)
+import TopNavigation from '@/components/common/TopNavigation';
+
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { fetchNotifications, markAllRead, type AppNotification } from '@/services/notificationService';
+
+const relTime = (iso?: string) => {
+    if (!iso) return '';
+    const diff = Date.now() - new Date(iso).getTime();
+    const m = Math.floor(diff / 60000);
+    if (m < 1) return '방금 전';
+    if (m < 60) return `${m}분 전`;
+    const h = Math.floor(m / 60);
+    if (h < 24) return `${h}시간 전`;
+    const d = Math.floor(h / 24);
+    if (d < 7) return `${d}일 전`;
+    return iso.slice(0, 10).replace(/-/g, '.');
+};
 
 const NotificationPage = () => {
-    // 알림 아이템 존재 여부를 관리하는 상태 변수 (임시)
-    // 실제로는 API 호출 등을 통해 알림 데이터를 가져올 예정.
-    // 추후에 코드 수정 예정
-    const notificatonItems = 1;
+    const navigate = useNavigate();
+    const [items, setItems] = useState<AppNotification[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        fetchNotifications()
+            .then(setItems)
+            .catch((e) => console.error('알림 조회 실패:', e))
+            .finally(() => setLoading(false));
+        // 열면 모두 읽음 처리(배지 제거)
+        markAllRead().catch(() => {});
+    }, []);
+
+    const handleClick = (n: AppNotification) => {
+        if (n.linkType === 'card' && n.linkId) navigate(`/feed/${n.linkId}`);
+        else if (n.linkType === 'friends') navigate('/friends');
+    };
 
     return (
-        <div className="h-full w-full">
-            <Link to="/home" className='inline-flex flex-row items-center'>
-                <span className="text-lg font-bold">뒤로 가기</span>
-            </Link>
-            { notificatonItems ?
-            <div className="flex flex-col h-full w-full overflow-y-auto gap-y-10">
-                <NotificationItem
-                    title="새로운 알림"
-                    content="알림 상세 내용이 여기에 표시됩니다."
-                    timestamp={Date.now()}
-                />
-                <NotificationItem
-                    title="다른 알림"
-                    content="또 다른 알림 상세 내용이 여기에 표시됩니다."
-                    timestamp={Date.now() - 1000000}
-                />
+        <div className="w-full h-full flex flex-col">
+            <TopNavigation title="알림" onBackClick={() => navigate('/home')} />
+
+            <div className="w-full px-6 flex flex-col gap-2 overflow-y-auto pb-8">
+                {!loading && items.length === 0 && (
+                    <div className="w-full text-center text-grey-60 text-[14px] mt-20">새로운 알림이 없어요.</div>
+                )}
+
+                {items.map((n) => (
+                    <button
+                        key={n.id}
+                        onClick={() => handleClick(n)}
+                        className={`w-full text-left rounded-2xl p-4 flex items-start gap-3 outline-1 outline-offset-[-1px] ${n.isRead ? 'bg-white outline-grey-95' : 'bg-VB-98 outline-VB-90'}`}
+                    >
+                        {/* 안읽음 점 */}
+                        <span className={`mt-1.5 w-2 h-2 rounded-full shrink-0 ${n.isRead ? 'bg-transparent' : 'bg-VB-50'}`} />
+                        <div className="flex flex-col">
+                            <span className="text-[14px] text-grey-15 leading-snug">{n.message}</span>
+                            <span className="text-[12px] text-grey-60 mt-1">{relTime(n.createdAt)}</span>
+                        </div>
+                    </button>
+                ))}
             </div>
-            :
-            <div className="flex flex-col items-center justify-center h-full w-full">
-                <div className="title-n text-grey-70">새로운 알림이 없습니다.</div>
-            </div>
-            }
         </div>
     );
 };

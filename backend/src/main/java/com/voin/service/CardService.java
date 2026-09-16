@@ -71,6 +71,7 @@ public class CardService {
     private final MemberCoinRepository memberCoinRepository;
     private final FriendRepository friendRepository;
     private final CardLikeRepository cardLikeRepository;
+    private final NotificationService notificationService;
     private final ImageUtil imageUtil;
 
     public Card findById(Long cardId) {
@@ -344,9 +345,8 @@ public class CardService {
     @Transactional
     public Map<String, Object> toggleLike(Long cardId) {
         UUID memberId = getCurrentMemberId();
-        if (!cardRepository.existsById(cardId)) {
-            throw new ResourceNotFoundException("Card not found with id: " + cardId);
-        }
+        Card card = cardRepository.findById(cardId)
+                .orElseThrow(() -> new ResourceNotFoundException("Card not found with id: " + cardId));
         boolean liked;
         Optional<CardLike> existing = cardLikeRepository.findByMemberIdAndCardId(memberId, cardId);
         if (existing.isPresent()) {
@@ -355,6 +355,13 @@ public class CardService {
         } else {
             cardLikeRepository.save(CardLike.of(memberId, cardId));
             liked = true;
+            // 좋아요를 새로 눌렀을 때만, 소유자에게 알림(본인 카드 제외)
+            UUID ownerId = card.getOwner() != null ? card.getOwner().getId() : null;
+            if (ownerId != null && !ownerId.equals(memberId)) {
+                String likerNick = memberRepository.findById(memberId).map(Member::getNickname).orElse("누군가");
+                notificationService.create(ownerId, "CARD_LIKED",
+                        likerNick + "님이 회원님의 카드에 좋아요를 눌렀어요.", "card", cardId);
+            }
         }
         Map<String, Object> result = new HashMap<>();
         result.put("liked", liked);
@@ -753,6 +760,9 @@ public class CardService {
                         mc -> { mc.addOneCoin(); memberCoinRepository.save(mc); },
                         () -> memberCoinRepository.save(MemberCoin.createWithOneCoin(receiverId, coin.getId()))
                 );
+
+        notificationService.create(receiver.getId(), "CARD_RECEIVED",
+                sender.getNickname() + "님이 장점 카드를 보냈어요.", "card", savedCard.getId());
 
         log.info("Friend card sent: sender={}, receiver={}, coinId={}, cardId={}",
                 sender.getId(), receiverId, coin.getId(), savedCard.getId());

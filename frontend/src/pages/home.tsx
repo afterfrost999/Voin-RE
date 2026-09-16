@@ -17,6 +17,7 @@ import SearchIcon from '@/assets/svgs/TodaysDiary/SearchIcon.svg?react';
 
 import { fetchCoinSummary, type CoinSummary } from '@/services/homeService';
 import { getAdvantageIcon } from '@/icons/advantageIcons';
+import { fetchUnreadCount } from '@/services/notificationService';
 
 
 const Home = () => {
@@ -64,6 +65,12 @@ const Home = () => {
         fetchCoinSummary()
             .then(setSummary)
             .catch((e) => console.error('코인 요약 조회 실패:', e));
+    }, []);
+
+    // 안읽은 알림 수 조회 (종 아이콘 배지)
+    const [unread, setUnread] = useState(0);
+    useEffect(() => {
+        fetchUnreadCount().then(setUnread).catch(() => {});
     }, []);
 
     // 케러셀 슬라이드 구성: 코인 찾기 + (보유 코인이 있으면 실데이터, 없으면 빈 상태)
@@ -155,8 +162,13 @@ const Home = () => {
                     >
                         로그아웃
                     </button>
-                    <Link to="/notification" className='inline-flex flex-row items-center'>
+                    <Link to="/notification" className='relative inline-flex flex-row items-center'>
                         <NotificationIcon style={{ opacity: 0.7 }}/>
+                        {unread > 0 && (
+                            <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 flex items-center justify-center rounded-full bg-red-500 text-white text-[10px] font-bold leading-none">
+                                {unread > 99 ? '99+' : unread}
+                            </span>
+                        )}
                     </Link>
                 </div>
             </div>

@@ -35,6 +35,7 @@ public class FriendService {
     private final MemberRepository memberRepository;
     private final CardRepository cardRepository;
     private final CardLikeRepository cardLikeRepository;
+    private final NotificationService notificationService;
 
     /**
      * 현재 로그인한 사용자 정보 가져오기
@@ -79,6 +80,8 @@ public class FriendService {
                 .build();
 
         Friend savedRequest = friendRepository.save(friendRequest);
+        notificationService.create(targetMember.getId(), "FRIEND_REQUEST",
+                currentMember.getNickname() + "님이 친구 요청을 보냈어요.", "friends", null);
         return convertToFriendRequestResponse(savedRequest);
     }
 
@@ -113,7 +116,10 @@ public class FriendService {
         }
 
         friendRequest.setStatus(FriendStatus.ACCEPTED);
-        return convertToFriendRequestResponse(friendRepository.save(friendRequest));
+        Friend saved = friendRepository.save(friendRequest);
+        notificationService.create(friendRequest.getFromMember().getId(), "FRIEND_ACCEPTED",
+                currentMember.getNickname() + "님이 친구 요청을 수락했어요.", "friends", null);
+        return convertToFriendRequestResponse(saved);
     }
 
     /**

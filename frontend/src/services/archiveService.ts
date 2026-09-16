@@ -15,6 +15,7 @@ export type ArchiveStory = {
 export type ArchiveCard = {
     id: number;
     content: string | null;
+    summary?: string | null;
     imageUrl?: string | null;
     creatorNickname?: string;
     ownerNickname?: string;

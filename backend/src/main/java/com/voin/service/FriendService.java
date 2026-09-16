@@ -230,6 +230,7 @@ public class FriendService {
                 .memberNickname(card.getOwner().getNickname())
                 .memberProfileImage(card.getOwner().getProfileImage())
                 .content(card.getContent())
+                .summary(card.getSummary())
                 .coinType(coinName)
                 .coinColor(coinColor)
                 .keywordName(keywordName)

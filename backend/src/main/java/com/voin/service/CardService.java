@@ -162,6 +162,29 @@ public class CardService {
     }
 
     /**
+     * 카드 상세(리치) 조회 — 공개 카드이거나 내 소유일 때만. (피드 상세용)
+     */
+    @Transactional(readOnly = true)
+    public Map<String, Object> getCardView(Long cardId) {
+        UUID memberId = getCurrentMemberId();
+        Card card = cardRepository.findById(cardId)
+                .orElseThrow(() -> new ResourceNotFoundException("Card not found with id: " + cardId));
+        boolean isOwner = card.getOwner() != null && card.getOwner().getId().equals(memberId);
+        if (!Boolean.TRUE.equals(card.getIsPublic()) && !isOwner) {
+            throw new RuntimeException("해당 카드를 볼 권한이 없습니다.");
+        }
+        Map<String, Object> data = toCardData(card);
+        data.put("likeCount", cardLikeRepository.countByCardId(cardId));
+        data.put("likedByMe", cardLikeRepository.findByMemberIdAndCardId(memberId, cardId).isPresent());
+        return data;
+    }
+
+    private String truncate(String s, int max) {
+        if (s == null) return null;
+        return s.length() > max ? s.substring(0, max) : s;
+    }
+
+    /**
      * Card 엔티티를 아카이브/목록용 리치 데이터(Map)로 변환.
      * (키워드·코인·스토리 정보 포함)
      */
@@ -171,6 +194,7 @@ public class CardService {
         // 기본 카드 정보
         cardData.put("id", card.getId());
         cardData.put("content", card.getContent());
+        cardData.put("summary", card.getSummary());
         cardData.put("imageUrl", card.getImageUrl());
         cardData.put("createdAt", card.getCreatedAt());
         if (card.getCreator() != null) cardData.put("creatorNickname", card.getCreator().getNickname());
@@ -637,6 +661,7 @@ public class CardService {
                 .keyword(keyword)
                 .content(request.getComment())
                 .imageUrl(imageUrl)
+                .summary(truncate(request.getSummary(), 500))
                 .isPublic(request.getIsPublic() != null ? request.getIsPublic() : false)
                 .build();
         Card savedCard = cardRepository.save(card);
@@ -716,6 +741,7 @@ public class CardService {
                 .keyword(keyword)
                 .content(request.getMessage())
                 .imageUrl(imageUrl)
+                .summary(truncate(request.getSummary(), 500))
                 .isPublic(request.getIsPublic() != null ? request.getIsPublic() : true)
                 .isGift(true)
                 .build();

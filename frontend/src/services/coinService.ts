@@ -7,6 +7,7 @@ export type SaveDiaryCoinParams = {
     storyType?: 'DAILY_DIARY' | 'EXPERIENCE_REFLECTION';
     comment?: string;
     imageUrl?: string;                                 // 첨부 이미지(base64 data URL, 선택)
+    summary?: string;                                  // 핵심 한 줄 요약
     isPublic?: boolean;
 };
 
@@ -28,6 +29,7 @@ export const saveDiaryCoin = async (params: SaveDiaryCoinParams): Promise<void> 
             keywordId: params.keywordId,
             comment: params.comment ?? '',
             imageUrl: params.imageUrl ?? null,
+            summary: params.summary ?? null,
             isPublic: params.isPublic ?? false,
         }),
     });
@@ -44,6 +46,7 @@ export type SendFriendCardParams = {
     keywordId: number;        // 키워드(S4)
     message?: string;         // 메시지(S6)
     imageUrl?: string;        // 이미지(S6, base64)
+    summary?: string;         // 핵심 한 줄 요약
     isPublic?: boolean;
 };
 
@@ -64,6 +67,7 @@ export const sendFriendCard = async (params: SendFriendCardParams): Promise<void
             keywordId: params.keywordId,
             message: params.message ?? '',
             imageUrl: params.imageUrl ?? null,
+            summary: params.summary ?? null,
             isPublic: params.isPublic ?? true,
         }),
     });

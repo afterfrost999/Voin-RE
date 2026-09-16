@@ -61,6 +61,7 @@ const SelectShareType = () => {
                 keywordId: data.keywordId,
                 message: data.comment,
                 imageUrl: data.uploadedImage,
+                summary: data.classify,
                 isPublic: true,
             });
             navigate('/memories-together/final-result');

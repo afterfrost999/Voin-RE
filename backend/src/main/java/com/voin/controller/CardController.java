@@ -138,6 +138,16 @@ public class CardController {
     }
 
     /**
+     * 카드 상세(리치) 조회 — 공개 카드/내 카드. 피드 상세용.
+     */
+    @Operation(summary = "카드 상세 조회", description = "공개 카드이거나 내 카드일 때 상세 정보를 반환합니다.")
+    @GetMapping("/{cardId}/view")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> getCardView(
+            @Parameter(description = "카드 ID") @PathVariable Long cardId) {
+        return ResponseEntity.ok(ApiResponse.success("카드를 조회했습니다.", cardService.getCardView(cardId)));
+    }
+
+    /**
      * 카드 좋아요 토글
      */
     @Operation(summary = "카드 좋아요 토글", description = "카드에 좋아요를 누르거나 취소합니다. { liked, likeCount } 반환.")

@@ -37,6 +37,9 @@ public class FriendCardRequest {
     @Schema(description = "첨부 이미지(base64 data URL, 선택)")
     private String imageUrl;
 
+    @Schema(description = "핵심 한 줄 요약(선택)")
+    private String summary;
+
     @Schema(description = "공개 여부(기본 true — 친구 피드 노출)", example = "true")
     private Boolean isPublic = true;
 }

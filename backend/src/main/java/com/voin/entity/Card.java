@@ -97,6 +97,12 @@ public class Card extends BaseEntity {
     private String imageUrl;
 
     /**
+     * 사례 핵심 한 줄 요약 (GPT 분류 시 생성). 피드/카드 미리보기에 사용.
+     */
+    @Column(name = "summary", length = 500)
+    private String summary;
+
+    /**
      * 카드 공개 여부
      */
     @Column(name = "is_public", nullable = false)

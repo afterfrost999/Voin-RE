@@ -30,6 +30,7 @@ const CommentAndImage = () => {
                     storyType: 'DAILY_DIARY',
                     comment: trimmed,
                     imageUrl: data.uploadedImage,
+                    summary: data.classify,
                     isPublic: false,
                 });
             }

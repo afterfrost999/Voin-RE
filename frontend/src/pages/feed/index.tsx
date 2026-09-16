@@ -4,6 +4,7 @@ import NavigationBar from '@/components/common/NavigationBar';
 import DefaultProfileIcon from '@/components/DefaultProfileIcon';
 
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { fetchFeed, toggleLike, type FeedCard } from '@/services/feedService';
 
 const fmtDate = (iso?: string) => (iso ? iso.slice(0, 10).replace(/-/g, '.') : '');
@@ -28,6 +29,7 @@ const Heart = ({ filled }: { filled: boolean }) => (
 );
 
 const Feed = () => {
+    const navigate = useNavigate();
     const [cards, setCards] = useState<FeedCard[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -64,39 +66,41 @@ const Feed = () => {
                 )}
 
                 {cards.map((card) => (
-                    <div key={card.cardId} className="w-full rounded-2xl bg-white shadow-[0px_5px_15px_-5px_rgba(35,48,59,0.10)] outline-1 outline-offset-[-1px] outline-grey-95 p-4 flex flex-col gap-3">
-                        {/* 헤더: 작성자 */}
-                        <div className="flex items-center gap-3">
-                            <Avatar src={card.memberProfileImage} />
-                            <div className="flex flex-col">
-                                <span className="text-[15px] font-semibold text-grey-15">{card.memberNickname}</span>
-                                <span className="text-[12px] text-grey-60">{fmtDate(card.createdAt)}</span>
+                    <div
+                        key={card.cardId}
+                        onClick={() => navigate(`/feed/${card.cardId}`)}
+                        className="w-full rounded-3xl bg-white shadow-[0px_10px_20px_-8px_rgba(35,48,59,0.12)] outline-1 outline-offset-[-1px] outline-white overflow-hidden cursor-pointer"
+                    >
+                        {/* 코인 색 상단 띠 */}
+                        <div className="h-1.5 w-full" style={{ backgroundColor: card.coinColor || '#55CFE5' }} />
+                        <div className="p-4 flex flex-col gap-3">
+                            {/* 작성자 */}
+                            <div className="flex items-center gap-3">
+                                <Avatar src={card.memberProfileImage} />
+                                <div className="flex flex-col">
+                                    <span className="text-[15px] font-semibold text-grey-15">{card.memberNickname}</span>
+                                    <span className="text-[12px] text-grey-60">{fmtDate(card.createdAt)}</span>
+                                </div>
                             </div>
-                        </div>
 
-                        {/* 코인/키워드 */}
-                        <div className="flex items-center gap-2">
-                            <span className="w-3 h-3 rounded-full inline-block" style={{ backgroundColor: card.coinColor || '#DBDCDF' }} />
-                            <span className="text-[13px] text-grey-60">{card.coinType}</span>
-                            <span className="text-[16px] font-semibold text-grey-15">· {card.keywordName}</span>
-                        </div>
+                            {/* 코인/키워드 */}
+                            <div className="flex items-center gap-2">
+                                <span className="px-2.5 py-1 rounded-full text-[12px] font-semibold text-white" style={{ backgroundColor: card.coinColor || '#55CFE5' }}>{card.coinType}</span>
+                                <span className="text-[16px] font-semibold text-grey-15">{card.keywordName}</span>
+                            </div>
 
-                        {/* 이미지 */}
-                        {card.imageUrl && (
-                            <img src={card.imageUrl} alt="" className="w-full max-h-64 object-cover rounded-xl" />
-                        )}
+                            {/* 핵심 한 줄 요약 (없으면 메시지) */}
+                            {(card.summary || card.content) && (
+                                <div className="text-[14px] text-grey-30 line-clamp-1">{card.summary || card.content}</div>
+                            )}
 
-                        {/* 메시지 */}
-                        {card.content && (
-                            <div className="text-[14px] text-grey-30 whitespace-pre-wrap leading-relaxed">{card.content}</div>
-                        )}
-
-                        {/* 좋아요 */}
-                        <div className="flex items-center gap-1.5 pt-1">
-                            <button onClick={() => handleLike(card.cardId)} className="inline-flex items-center gap-1.5" aria-label="좋아요">
-                                <Heart filled={card.likedByMe} />
-                                <span className={`text-[14px] ${card.likedByMe ? 'text-[#FF5A78]' : 'text-grey-60'}`}>{card.likeCount}</span>
-                            </button>
+                            {/* 좋아요 (카드 이동과 분리) */}
+                            <div className="flex items-center gap-1.5 pt-1" onClick={(e) => e.stopPropagation()}>
+                                <button onClick={() => handleLike(card.cardId)} className="inline-flex items-center gap-1.5" aria-label="좋아요">
+                                    <Heart filled={card.likedByMe} />
+                                    <span className={`text-[14px] ${card.likedByMe ? 'text-[#FF5A78]' : 'text-grey-60'}`}>{card.likeCount}</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 ))}

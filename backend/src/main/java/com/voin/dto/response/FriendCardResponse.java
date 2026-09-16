@@ -27,6 +27,9 @@ public class FriendCardResponse {
     @Schema(description = "카드 내용(메시지)")
     private String content;
 
+    @Schema(description = "핵심 한 줄 요약")
+    private String summary;
+
     @Schema(description = "코인(카테고리) 이름")
     private String coinType;
 

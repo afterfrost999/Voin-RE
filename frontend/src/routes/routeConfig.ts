@@ -37,6 +37,7 @@ import Login from "@/pages/login";
 import MyInfo from '@/pages/myInfo/index';
 import Friends from '@/pages/friends/index';
 import Feed from '@/pages/feed/index';
+import FeedDetail from '@/pages/feed/detail';
 import ArchiveHome from '@/pages/archive/index';
 import ArchiveCategories from '@/pages/archive/categories';
 import ArchiveCardList from '@/pages/archive/cards';
@@ -68,6 +69,7 @@ export const routes: RouteConfig[] = [
     { path: '/my-info', component: MyInfo, isProtected: true },
     { path: '/friends', component: Friends, isProtected: true },
     { path: '/feed', component: Feed, isProtected: true },
+    { path: '/feed/:cardId', component: FeedDetail, isProtected: true },
     { path: '/notification', component: Notification, isProtected: true },
 
     // archive

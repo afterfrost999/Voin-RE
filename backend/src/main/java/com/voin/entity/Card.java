@@ -111,6 +111,18 @@ public class Card extends BaseEntity {
     private Boolean isGift = false;
 
     /**
+     * 작성자(보낸 사람)가 자신의 '친구에게 써준 카드' 목록에서 숨겼는지 여부.
+     * (실제 카드는 받는 친구에게 유지되며, 작성자 목록에서만 제외됨)
+     */
+    @Column(name = "creator_hidden", nullable = false)
+    @Builder.Default
+    private Boolean creatorHidden = false;
+
+    public void hideFromCreator() {
+        this.creatorHidden = true;
+    }
+
+    /**
      * 카드가 생성된 상황 맥락 (경험 돌아보기에서 사용)
      * 예: "일상적 행동, 습관", "다른 사람과 대화, 행동" 등
      */

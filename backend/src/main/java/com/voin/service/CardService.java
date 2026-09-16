@@ -140,9 +140,10 @@ public class CardService {
                 .filter(c -> c.getTargetMember() != null && c.getTargetMember().getId().equals(me.getId()))
                 .map(this::toCardData).collect(Collectors.toList());
 
-        // 내가 친구에게 써준 카드 (대상이 내가 아님)
+        // 내가 친구에게 써준 카드 (대상이 내가 아님, 내 목록에서 숨기지 않은 것)
         List<Map<String, Object>> given = myCards.stream()
                 .filter(c -> c.getTargetMember() == null || !c.getTargetMember().getId().equals(me.getId()))
+                .filter(c -> !Boolean.TRUE.equals(c.getCreatorHidden()))
                 .map(this::toCardData).collect(Collectors.toList());
 
         // 타인이 나에게 써준 카드 (내가 소유하지만 작성자가 남)
@@ -169,6 +170,8 @@ public class CardService {
         cardData.put("content", card.getContent());
         cardData.put("imageUrl", card.getImageUrl());
         cardData.put("createdAt", card.getCreatedAt());
+        if (card.getCreator() != null) cardData.put("creatorNickname", card.getCreator().getNickname());
+        if (card.getOwner() != null) cardData.put("ownerNickname", card.getOwner().getNickname());
         cardData.put("isPublic", card.getIsPublic());
         cardData.put("isGift", card.getIsGift());
         cardData.put("situationContext", card.getSituationContext());
@@ -306,6 +309,22 @@ public class CardService {
 
         cardRepository.delete(card);
         log.info("Deleted card: {} by member: {}", cardId, memberId);
+    }
+
+    /**
+     * '친구에게 써준 카드'를 내(작성자) 목록에서만 숨긴다. 실제 카드는 받는 친구에게 유지된다.
+     */
+    @Transactional
+    public void hideGivenCard(Long cardId) {
+        UUID memberId = getCurrentMemberId();
+        Card card = cardRepository.findById(cardId)
+                .orElseThrow(() -> new ResourceNotFoundException("Card not found with id: " + cardId));
+        if (card.getCreator() == null || !card.getCreator().getId().equals(memberId)) {
+            throw new RuntimeException("해당 카드를 숨길 권한이 없습니다.");
+        }
+        card.hideFromCreator();
+        cardRepository.save(card);
+        log.info("Given card hidden from creator: cardId={} by member={}", cardId, memberId);
     }
 
     // ===== 코인 찾기 플로우 메서드들 =====

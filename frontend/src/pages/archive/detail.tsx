@@ -4,7 +4,7 @@ import ActionButton from '@/components/common/ActionButton';
 
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { fetchArchive, deleteCard, type Archive, type ArchiveCard, type ArchiveType } from '@/services/archiveService';
+import { fetchArchive, deleteCard, hideCard, type Archive, type ArchiveCard, type ArchiveType } from '@/services/archiveService';
 import { getAdvantageIcon } from '@/icons/advantageIcons';
 
 const fmtDate = (iso?: string) => (iso ? iso.slice(0, 10).replace(/-/g, '.') : '');
@@ -14,6 +14,7 @@ const ArchiveCardDetail = () => {
     const { type, coinId, cardId } = useParams<{ type: ArchiveType; coinId: string; cardId: string }>();
     const [archive, setArchive] = useState<Archive | null>(null);
     const [deleting, setDeleting] = useState(false);
+    const isGiven = type === 'given';
 
     useEffect(() => {
         fetchArchive().then(setArchive).catch((e) => console.error('아카이브 조회 실패:', e));
@@ -26,6 +27,21 @@ const ArchiveCardDetail = () => {
 
     const handleDelete = async () => {
         if (deleting || !card) return;
+        if (isGiven) {
+            // 친구에게 써준 카드: 실제 삭제가 아니라 내 목록에서만 숨김
+            if (!window.confirm('이 카드를 내 목록에서 숨길까요? (받는 친구에게는 그대로 남아요)')) return;
+            try {
+                setDeleting(true);
+                await hideCard(card.id);
+                navigate(`/archive/${type}`);
+            } catch (e) {
+                console.error(e);
+                alert('목록에서 숨기는 데 실패했어요. 잠시 후 다시 시도해주세요.');
+            } finally {
+                setDeleting(false);
+            }
+            return;
+        }
         if (!window.confirm('이 카드를 삭제할까요? 삭제하면 코인 개수도 줄어들어요. (되돌릴 수 없어요)')) return;
         try {
             setDeleting(true);
@@ -73,6 +89,12 @@ const ArchiveCardDetail = () => {
                             style={card.imageUrl ? { textShadow: '0 1px 4px rgba(0,0,0,0.55)' } : undefined}
                         >
                             <span className="text-[13px] font-medium opacity-95">{coin?.name}</span>
+                            {type === 'given' && card.ownerNickname && (
+                                <span className="text-[12px] font-medium opacity-95 mt-1">{card.ownerNickname}님에게 써준 카드</span>
+                            )}
+                            {type === 'received' && card.creatorNickname && (
+                                <span className="text-[12px] font-medium opacity-95 mt-1">{card.creatorNickname}님이 써준 카드</span>
+                            )}
                             {Icon && (
                                 <span className="my-3 home-svg-white">
                                     <Icon className="h-14 w-14" />
@@ -109,7 +131,7 @@ const ArchiveCardDetail = () => {
                     {/* 삭제 (수정은 불가) */}
                     <div className="w-full mt-8">
                         <ActionButton
-                            buttonText={deleting ? '삭제 중...' : '카드 삭제'}
+                            buttonText={deleting ? (isGiven ? '숨기는 중...' : '삭제 중...') : (isGiven ? '목록에서 삭제' : '카드 삭제')}
                             onClick={handleDelete}
                             disabled={deleting}
                         />

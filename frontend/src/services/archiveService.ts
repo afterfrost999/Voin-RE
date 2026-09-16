@@ -16,6 +16,8 @@ export type ArchiveCard = {
     id: number;
     content: string | null;
     imageUrl?: string | null;
+    creatorNickname?: string;
+    ownerNickname?: string;
     createdAt: string;
     isPublic?: boolean;
     isGift?: boolean;
@@ -46,6 +48,15 @@ export const deleteCard = async (cardId: number): Promise<void> => {
         headers: { ...authHeader() },
     });
     if (!res.ok) throw new Error(`카드 삭제 실패: ${res.status}`);
+};
+
+/** 친구에게 써준 카드를 내 목록에서만 숨기기 (실제 카드는 유지) */
+export const hideCard = async (cardId: number): Promise<void> => {
+    const res = await fetch(`/api/cards/${cardId}/hide`, {
+        method: 'POST',
+        headers: { ...authHeader() },
+    });
+    if (!res.ok) throw new Error(`목록에서 숨기기 실패: ${res.status}`);
 };
 
 /** 카드 목록을 코인(카테고리)별로 그룹핑 */

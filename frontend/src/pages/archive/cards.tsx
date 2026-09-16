@@ -43,6 +43,12 @@ const ArchiveCardList = () => {
                             <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: coinColor }} />
                             <div className="flex flex-col items-start">
                                 <span className="text-[16px] font-semibold text-grey-15">{card.keyword?.name}</span>
+                                {type === 'given' && card.ownerNickname && (
+                                    <span className="text-[12px] text-VB-50 mt-0.5">{card.ownerNickname}님에게</span>
+                                )}
+                                {type === 'received' && card.creatorNickname && (
+                                    <span className="text-[12px] text-VB-50 mt-0.5">{card.creatorNickname}님이</span>
+                                )}
                                 {card.story?.content && (
                                     <span className="text-[13px] text-grey-60 mt-0.5 line-clamp-1 text-left">
                                         {card.story.content}

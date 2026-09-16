@@ -136,4 +136,16 @@ public class CardController {
         cardService.deleteCard(cardId);
         return ResponseEntity.ok(ApiResponse.<Void>success("카드가 삭제되었습니다.", null));
     }
+
+    /**
+     * 친구에게 써준 카드를 내 목록에서 숨기기 (실제 카드는 유지)
+     */
+    @Operation(summary = "써준 카드 목록에서 숨기기", description = "친구에게 써준 카드를 내 목록에서만 숨깁니다. 카드는 받는 친구에게 유지됩니다.")
+    @PostMapping("/{cardId}/hide")
+    public ResponseEntity<ApiResponse<Void>> hideGivenCard(
+            @Parameter(description = "카드 ID") @PathVariable Long cardId) {
+        log.info("Hiding given card from creator: id={}", cardId);
+        cardService.hideGivenCard(cardId);
+        return ResponseEntity.ok(ApiResponse.<Void>success("목록에서 숨겼습니다.", null));
+    }
 } 

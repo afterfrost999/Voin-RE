@@ -749,7 +749,8 @@ public class CardService {
                 .content(request.getMessage())
                 .imageUrl(imageUrl)
                 .summary(truncate(request.getSummary(), 500))
-                .isPublic(request.getIsPublic() != null ? request.getIsPublic() : true)
+                // 받은 카드는 소유자(b)가 직접 켜야 피드에 노출(opt-in). 보낸 사람의 공개 선택은 무시.
+                .isPublic(false)
                 .isGift(true)
                 .build();
         Card savedCard = cardRepository.save(card);

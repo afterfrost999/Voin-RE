@@ -35,6 +35,7 @@ import MemoriesTogetherSelectShareType from '@/pages/findCoin/memories-together/
 import MemoriesTogetherFinalResult from '@/pages/findCoin/memories-together/writeCase1/writeCase2/categories/advantageResult/commentAndImage/selectShareType/finalResult/index';
 import Login from "@/pages/login";
 import MyInfo from '@/pages/myInfo/index';
+import Friends from '@/pages/friends/index';
 import ArchiveHome from '@/pages/archive/index';
 import ArchiveCategories from '@/pages/archive/categories';
 import ArchiveCardList from '@/pages/archive/cards';
@@ -64,6 +65,7 @@ export const routes: RouteConfig[] = [
     { path: '/', component: Home, isProtected: true },
     { path: '/home', component: Home, isProtected: true },
     { path: '/my-info', component: MyInfo, isProtected: true },
+    { path: '/friends', component: Friends, isProtected: true },
     { path: '/notification', component: Notification, isProtected: true },
 
     // archive

@@ -4,6 +4,7 @@ import com.voin.dto.request.FriendRequestDto;
 import com.voin.dto.response.ApiResponse;
 import com.voin.dto.response.FriendRequestResponse;
 import com.voin.dto.response.FriendCardResponse;
+import com.voin.dto.response.FriendResponse;
 import com.voin.service.FriendService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -23,6 +24,15 @@ import java.util.UUID;
 public class FriendController {
 
     private final FriendService friendService;
+
+    /**
+     * 내 친구 목록 조회
+     */
+    @Operation(summary = "내 친구 목록", description = "수락된 친구 목록을 조회합니다.")
+    @GetMapping
+    public ApiResponse<List<FriendResponse>> getFriends() {
+        return ApiResponse.success(friendService.getFriends());
+    }
 
     /**
      * 친구 요청 보내기

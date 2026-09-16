@@ -3,6 +3,7 @@ package com.voin.service;
 import com.voin.constant.FriendStatus;
 import com.voin.dto.response.FriendRequestResponse;
 import com.voin.dto.response.FriendCardResponse;
+import com.voin.dto.response.FriendResponse;
 import com.voin.entity.Friend;
 import com.voin.entity.Member;
 import com.voin.entity.Card;
@@ -139,6 +140,21 @@ public class FriendService {
         log.info("친구 삭제됨: {} <-> {}", currentMember.getId(), friendMemberId);
     }
 
+
+    /**
+     * 내 친구 목록(수락된 관계) 조회
+     */
+    @Transactional(readOnly = true)
+    public List<FriendResponse> getFriends() {
+        Member currentMember = getCurrentMember();
+        return friendRepository.findAcceptedFriends(currentMember).stream()
+                .map(m -> FriendResponse.builder()
+                        .memberId(m.getId().toString())
+                        .nickname(m.getNickname())
+                        .profileImage(m.getProfileImage())
+                        .build())
+                .collect(Collectors.toList());
+    }
 
     /**
      * 친구들의 피드(카드) 가져오기

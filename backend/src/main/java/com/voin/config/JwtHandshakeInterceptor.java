@@ -26,14 +26,20 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
         // 클라에서 연결 시 `Authorization: Bearer xxx` 헤더를 보내도록 권장
         if (request instanceof ServletServerHttpRequest servlet) {
             var httpReq = servlet.getServletRequest();
+            // 1) Authorization 헤더 우선
             String auth = httpReq.getHeader("Authorization");
+            String token = null;
             if (auth != null && auth.startsWith("Bearer ")) {
-                String token = auth.substring(7);
-                if (jwtTokenProvider.validateToken(token)) {
-                    String memberId = jwtTokenProvider.getSubject(token); // 용용 프로젝트에서 subject=memberId
-                    attributes.put("memberId", memberId);
-                    return true;
-                }
+                token = auth.substring(7);
+            }
+            // 2) 브라우저 SockJS는 커스텀 헤더를 못 붙이므로 ?token= 쿼리파라미터도 허용
+            if (token == null) {
+                token = httpReq.getParameter("token");
+            }
+            if (token != null && jwtTokenProvider.validateToken(token)) {
+                String memberId = jwtTokenProvider.getSubject(token); // 용용 프로젝트에서 subject=memberId
+                attributes.put("memberId", memberId);
+                return true;
             }
         }
         return false; // 인증 실패 시 연결 거절

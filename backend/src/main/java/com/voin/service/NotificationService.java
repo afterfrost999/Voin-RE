@@ -35,13 +35,20 @@ public class NotificationService {
     @Transactional
     public void create(UUID recipientId, String type, String message, String linkType, Long linkId) {
         if (recipientId == null) return;
-        notificationRepository.save(Notification.builder()
+        Notification saved = notificationRepository.save(Notification.builder()
                 .recipientId(recipientId)
                 .type(type)
                 .message(message)
                 .linkType(linkType)
                 .linkId(linkId)
                 .build());
+        // 실시간 push: 수신자가 접속 중이면 즉시 배지/목록 갱신
+        try {
+            messagingTemplate.convertAndSendToUser(
+                    recipientId.toString(), "/queue/notifications", toResponse(saved));
+        } catch (Exception e) {
+            log.warn("실시간 알림 push 실패 (저장은 완료됨): {}", e.getMessage());
+        }
     }
 
     @Transactional(readOnly = true)

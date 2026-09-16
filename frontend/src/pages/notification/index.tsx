@@ -4,6 +4,7 @@ import TopNavigation from '@/components/common/TopNavigation';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchNotifications, markAllRead, type AppNotification } from '@/services/notificationService';
+import { subscribeNotifications } from '@/services/notificationSocket';
 
 const relTime = (iso?: string) => {
     if (!iso) return '';
@@ -30,6 +31,11 @@ const NotificationPage = () => {
             .finally(() => setLoading(false));
         // 열면 모두 읽음 처리(배지 제거)
         markAllRead().catch(() => {});
+        // 페이지가 열려있는 동안 새 알림이 오면 맨 위에 추가
+        const unsub = subscribeNotifications((n) => {
+            setItems((prev) => (prev.some((p) => p.id === n.id) ? prev : [n, ...prev]));
+        });
+        return unsub;
     }, []);
 
     const handleClick = (n: AppNotification) => {

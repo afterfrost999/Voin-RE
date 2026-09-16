@@ -11,6 +11,8 @@ const isProd = process.env.NODE_ENV === 'production'
 
 export default defineConfig({
   appType: 'spa',
+  // sockjs-client가 참조하는 Node 전역 `global`을 브라우저에서 대체
+  define: { global: 'globalThis' },
   server: {
     host: true,        // ← localhost 대신 true로 (127.0.0.1/::1 모두 수용)
     port: 5174,        // ← 임시로 다른 포트 사용해 SW/충돌 영향 제거
@@ -19,6 +21,7 @@ export default defineConfig({
     proxy: {
       '/api': { target: 'http://localhost:8080', changeOrigin: true, secure: false },
       '/signup/profile-image': { target: 'http://localhost:8080', changeOrigin: true, secure: false },
+      '/ws': { target: 'http://localhost:8080', changeOrigin: true, ws: true, secure: false },
     },
   },
   plugins: [

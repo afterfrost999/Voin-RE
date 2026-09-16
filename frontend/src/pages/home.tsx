@@ -18,6 +18,7 @@ import SearchIcon from '@/assets/svgs/TodaysDiary/SearchIcon.svg?react';
 import { fetchCoinSummary, type CoinSummary } from '@/services/homeService';
 import { getAdvantageIcon } from '@/icons/advantageIcons';
 import { fetchUnreadCount } from '@/services/notificationService';
+import { subscribeNotifications } from '@/services/notificationSocket';
 
 
 const Home = () => {
@@ -71,6 +72,9 @@ const Home = () => {
     const [unread, setUnread] = useState(0);
     useEffect(() => {
         fetchUnreadCount().then(setUnread).catch(() => {});
+        // 실시간: 새 알림이 오면 배지 +1
+        const unsub = subscribeNotifications(() => setUnread((n) => n + 1));
+        return unsub;
     }, []);
 
     // 케러셀 슬라이드 구성: 코인 찾기 + (보유 코인이 있으면 실데이터, 없으면 빈 상태)

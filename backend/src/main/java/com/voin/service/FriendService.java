@@ -142,12 +142,21 @@ public class FriendService {
 
 
     /**
+     * 수락된 친구 관계에서 '상대방' 멤버 목록을 산출한다.
+     */
+    private List<Member> acceptedFriendsOf(Member me) {
+        return friendRepository.findAcceptedRelations(me).stream()
+                .map(f -> f.getFromMember().getId().equals(me.getId()) ? f.getToMember() : f.getFromMember())
+                .collect(Collectors.toList());
+    }
+
+    /**
      * 내 친구 목록(수락된 관계) 조회
      */
     @Transactional(readOnly = true)
     public List<FriendResponse> getFriends() {
         Member currentMember = getCurrentMember();
-        return friendRepository.findAcceptedFriends(currentMember).stream()
+        return acceptedFriendsOf(currentMember).stream()
                 .map(m -> FriendResponse.builder()
                         .memberId(m.getId().toString())
                         .nickname(m.getNickname())
@@ -165,7 +174,7 @@ public class FriendService {
                 .orElseThrow(() -> new RuntimeException("로그인한 사용자를 찾을 수 없습니다."));
         
         // 수락된 친구 관계에서 친구들 목록 가져오기
-        List<Member> friends = friendRepository.findAcceptedFriends(currentMember);
+        List<Member> friends = acceptedFriendsOf(currentMember);
         
         // 친구들의 공개 카드만 가져오기
         List<Card> friendCards = cardRepository.findByOwnerInAndIsPublicTrueOrderByCreatedAtDesc(friends);

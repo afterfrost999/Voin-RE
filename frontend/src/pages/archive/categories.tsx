@@ -17,7 +17,7 @@ const ArchiveCategories = () => {
     const titleMap: Record<ArchiveType, string> = {
         created: '내가 작성한 카드',
         given: '친구에게 써준 카드',
-        received: '타인이 작성한 카드',
+        received: '타인이 작성해준 카드',
     };
     const t = (type ?? 'created') as ArchiveType;
     const title = titleMap[t];

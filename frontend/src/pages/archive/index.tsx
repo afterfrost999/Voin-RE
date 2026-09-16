@@ -46,7 +46,7 @@ const ArchiveHome = () => {
 
                 <button className={cardClass} onClick={() => navigate('/archive/received')}>
                     <div className="flex flex-col items-start">
-                        <span className="text-[16px] font-semibold line-14 text-grey-30">타인이 작성한 카드</span>
+                        <span className="text-[16px] font-semibold line-14 text-grey-30">타인이 작성해준 카드</span>
                         <span className="text-[13px] font-medium text-grey-60 mt-1">친구가 찾아준 나의 장점</span>
                     </div>
                     <span className="text-[18px] font-semibold text-VB-50">{receivedCount}개</span>

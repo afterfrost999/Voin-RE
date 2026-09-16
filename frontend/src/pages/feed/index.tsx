@@ -3,7 +3,7 @@ import TopNavigation from '@/components/common/TopNavigation';
 import NavigationBar from '@/components/common/NavigationBar';
 import DefaultProfileIcon from '@/components/DefaultProfileIcon';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchFeed, toggleLike, type FeedCard } from '@/services/feedService';
 
@@ -33,9 +33,41 @@ const Feed = () => {
     const [cards, setCards] = useState<FeedCard[]>([]);
     const [loading, setLoading] = useState(true);
 
+    // 당겨서 새로고침
+    const scrollRef = useRef<HTMLDivElement>(null);
+    const startY = useRef(0);
+    const pulling = useRef(false);
+    const [pullY, setPullY] = useState(0);
+    const [refreshing, setRefreshing] = useState(false);
+
+    const load = () => fetchFeed().then(setCards).catch((e) => console.error('피드 조회 실패:', e));
+
     useEffect(() => {
-        fetchFeed().then(setCards).catch((e) => console.error('피드 조회 실패:', e)).finally(() => setLoading(false));
+        load().finally(() => setLoading(false));
     }, []);
+
+    const onTouchStart = (e: React.TouchEvent) => {
+        if ((scrollRef.current?.scrollTop ?? 0) <= 0) {
+            startY.current = e.touches[0].clientY;
+            pulling.current = true;
+        }
+    };
+    const onTouchMove = (e: React.TouchEvent) => {
+        if (!pulling.current) return;
+        const dy = e.touches[0].clientY - startY.current;
+        if (dy > 0) setPullY(Math.min(dy * 0.5, 70));
+        else { pulling.current = false; setPullY(0); }
+    };
+    const onTouchEnd = async () => {
+        if (!pulling.current) return;
+        pulling.current = false;
+        if (pullY > 45) {
+            setRefreshing(true);
+            await load();
+            setRefreshing(false);
+        }
+        setPullY(0);
+    };
 
     const handleLike = async (cardId: number) => {
         // 낙관적 업데이트
@@ -58,7 +90,19 @@ const Feed = () => {
         <div className="w-full h-full flex flex-col">
             <TopNavigation title="피드" caption="친구들이 모은 장점을 구경해보세요." />
 
-            <div className="flex-1 w-full px-6 flex flex-col gap-4 overflow-y-auto pb-4">
+            <div
+                ref={scrollRef}
+                onTouchStart={onTouchStart}
+                onTouchMove={onTouchMove}
+                onTouchEnd={onTouchEnd}
+                className="flex-1 w-full px-6 flex flex-col gap-4 overflow-y-auto pb-4"
+            >
+                {/* 당겨서 새로고침 표시 */}
+                {(pullY > 0 || refreshing) && (
+                    <div className="w-full flex items-center justify-center text-[12px] text-grey-60 overflow-hidden" style={{ height: refreshing ? 36 : pullY }}>
+                        {refreshing ? '새로고침 중...' : (pullY > 45 ? '놓으면 새로고침' : '당겨서 새로고침')}
+                    </div>
+                )}
                 {!loading && cards.length === 0 && (
                     <div className="w-full text-center text-grey-60 text-[14px] mt-16">
                         아직 볼 수 있는 친구 카드가 없어요.<br />친구를 맺고 서로의 장점을 공개해보세요.

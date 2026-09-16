@@ -787,6 +787,7 @@ public class CardService {
     /**
      * 카드 공개/비공개 설정 변경
      */
+    @Transactional
     public CardResponse updateCardVisibility(Long cardId, Boolean isPublic) {
         UUID currentMemberId = getCurrentMemberId();
         

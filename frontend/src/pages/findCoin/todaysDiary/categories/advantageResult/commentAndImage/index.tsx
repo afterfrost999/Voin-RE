@@ -11,6 +11,7 @@ import { saveDiaryCoin } from "@/services/coinService";
 const CommentAndImage = () => {
     const [comment, setComment] = useState("");
     const [saving, setSaving] = useState(false);
+    const [isPublic, setIsPublic] = useState(false);
     const setActivityData = useActivityStore((state) => state.setData);
     const navigate = useNavigate();
 
@@ -31,7 +32,7 @@ const CommentAndImage = () => {
                     comment: trimmed,
                     imageUrl: data.uploadedImage,
                     summary: data.classify,
-                    isPublic: false,
+                    isPublic: isPublic,
                 });
             }
             navigate('/todays-diary/final-result');
@@ -58,6 +59,23 @@ const CommentAndImage = () => {
                     placeholder="다짐, 또는 기억해두고 싶은 한마디를 남겨보세요."
                     maxLength={300}
                 />
+
+                {/* 피드 공개 여부 */}
+                <div className="w-full flex items-center justify-between rounded-2xl bg-grey-98 p-4">
+                    <div className="flex flex-col">
+                        <span className="text-[15px] font-semibold text-grey-15">피드에 공개할까요?</span>
+                        <span className="text-[12px] text-grey-60">친구들의 피드에 이 카드가 보여요 (추후 수정 가능합니다)</span>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={() => setIsPublic((v) => !v)}
+                        aria-label="피드 공개 여부"
+                        className={`relative w-12 h-7 rounded-full transition-colors ${isPublic ? 'bg-VB-50' : 'bg-grey-90'}`}
+                    >
+                        <span className={`absolute top-0.5 w-6 h-6 bg-white rounded-full shadow transition-all ${isPublic ? 'left-[22px]' : 'left-0.5'}`} />
+                    </button>
+                </div>
+
                 <div className="w-full mt-2 mb-4">
                     <ActionButton
                         buttonText={saving ? "저장 중..." : "완료"}

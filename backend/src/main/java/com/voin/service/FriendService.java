@@ -177,11 +177,11 @@ public class FriendService {
     public List<FriendCardResponse> getFriendsFeed() {
         Member currentMember = getCurrentMember();
 
-        List<Member> friends = acceptedFriendsOf(currentMember);
-        if (friends.isEmpty()) return List.of();
+        // 친구들 + 나 자신의 공개 카드
+        List<Member> owners = new java.util.ArrayList<>(acceptedFriendsOf(currentMember));
+        owners.add(currentMember);
 
-        // 친구들의 공개 카드만 가져오기
-        List<Card> friendCards = cardRepository.findByOwnerInAndIsPublicTrueOrderByCreatedAtDesc(friends);
+        List<Card> friendCards = cardRepository.findByOwnerInAndIsPublicTrueOrderByCreatedAtDesc(owners);
         if (friendCards.isEmpty()) return List.of();
 
         // 좋아요 수 / 내가 누른 것 집계 (배치)

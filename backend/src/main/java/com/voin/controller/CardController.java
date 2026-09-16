@@ -3,6 +3,7 @@ package com.voin.controller;
 import com.voin.dto.request.CardCreateRequest;
 import com.voin.dto.request.CardVisibilityUpdateRequest;
 import com.voin.dto.request.DiaryCardRequest;
+import com.voin.dto.request.FriendCardRequest;
 import com.voin.dto.response.ApiResponse;
 import com.voin.dto.response.CardResponse;
 import com.voin.entity.Card;
@@ -52,6 +53,18 @@ public class CardController {
         log.info("Acquiring coin from diary: keywordId={}", request.getKeywordId());
         CardResponse card = cardService.acquireCoinFromDiary(request);
         return ResponseEntity.ok(ApiResponse.success("코인을 획득했습니다.", card));
+    }
+
+    /**
+     * 친구에게 장점 카드 보내기 (친구의 코인 +1)
+     */
+    @Operation(summary = "친구 장점 카드 보내기", description = "친구의 장점을 카드로 만들어 보냅니다. 받는 친구의 코인이 증가합니다.")
+    @PostMapping("/friend")
+    public ResponseEntity<ApiResponse<CardResponse>> createFriendCard(
+            @Valid @RequestBody FriendCardRequest request) {
+        log.info("Creating friend card: receiverId={}, keywordId={}", request.getReceiverId(), request.getKeywordId());
+        CardResponse card = cardService.createFriendCard(request);
+        return ResponseEntity.ok(ApiResponse.success("친구에게 장점 카드를 보냈습니다.", card));
     }
 
     /**

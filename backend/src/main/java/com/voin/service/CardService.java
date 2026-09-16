@@ -14,8 +14,10 @@ import com.voin.repository.CoinRepository;
 import com.voin.repository.KeywordRepository;
 import com.voin.repository.MemberRepository;
 import com.voin.repository.MemberCoinRepository;
+import com.voin.repository.FriendRepository;
 import com.voin.util.ImageUtil;
 import com.voin.dto.request.DiaryCardRequest;
+import com.voin.dto.request.FriendCardRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -65,6 +67,7 @@ public class CardService {
     private final KeywordRepository keywordRepository;
     private final MemberRepository memberRepository;
     private final MemberCoinRepository memberCoinRepository;
+    private final FriendRepository friendRepository;
     private final ImageUtil imageUtil;
 
     public Card findById(Long cardId) {
@@ -591,6 +594,87 @@ public class CardService {
                 );
 
         log.info("Coin acquired from diary: member={}, coinId={}, cardId={}", memberId, coin.getId(), savedCard.getId());
+        return convertToCardResponse(savedCard, List.of(keyword));
+    }
+
+    /**
+     * 👥 친구 장점 카드 생성 (Phase B)
+     *
+     * 보낸 사람(sender)이 받는 친구(receiver)의 장점을 상황/행동/느낌으로 적어 카드로 보낸다.
+     * 한 트랜잭션에서 Story 생성 → Card 생성(creator=sender, owner/target=receiver) →
+     * 받는 친구의 코인 +1. 친구 관계가 아니면 거부한다.
+     */
+    @Transactional
+    public CardResponse createFriendCard(FriendCardRequest request) {
+        Member sender = memberRepository.findById(getCurrentMemberId())
+                .orElseThrow(() -> new RuntimeException("로그인한 사용자를 찾을 수 없습니다."));
+        UUID receiverId = UUID.fromString(request.getReceiverId());
+
+        if (sender.getId().equals(receiverId)) {
+            throw new RuntimeException("자신에게는 보낼 수 없습니다.");
+        }
+        Member receiver = memberRepository.findById(receiverId)
+                .orElseThrow(() -> new RuntimeException("받는 친구를 찾을 수 없습니다."));
+
+        // 친구 관계(수락됨) 확인
+        friendRepository.findAcceptedFriendBetween(sender.getId(), receiverId)
+                .orElseThrow(() -> new RuntimeException("친구 관계가 아닙니다."));
+
+        Keyword keyword = keywordRepository.findById(request.getKeywordId())
+                .orElseThrow(() -> new RuntimeException("키워드를 찾을 수 없습니다."));
+        Coin coin = keyword.getCoin();
+
+        // 상황 맥락은 varchar(100) 제한
+        String situation = request.getSituationContext();
+        if (situation != null && situation.length() > 100) {
+            situation = situation.substring(0, 100);
+        }
+
+        // 스토리(보낸 사람이 친구에 대해 작성)
+        Story story = Story.builder()
+                .memberId(sender.getId())
+                .title("함께한 추억")
+                .content(request.getAction())
+                .storyType(StoryType.EXPERIENCE_REFLECTION)
+                .situationContext(situation)
+                .answer1(request.getAction())
+                .answer2(request.getFeeling())
+                .build();
+        Story savedStory = storyRepository.save(story);
+
+        // 첨부 이미지(base64) 저장
+        String imageUrl = null;
+        if (request.getImageUrl() != null && request.getImageUrl().startsWith("data:image")) {
+            try {
+                imageUrl = imageUtil.saveBase64Image(request.getImageUrl(), "card.png");
+            } catch (Exception e) {
+                log.warn("친구 카드 이미지 저장 실패(무시하고 진행): {}", e.getMessage());
+            }
+        }
+
+        // 카드: 만든 사람=sender, 소유·대상=receiver, 선물
+        Card card = Card.builder()
+                .creator(sender)
+                .owner(receiver)
+                .targetMember(receiver)
+                .story(savedStory)
+                .keyword(keyword)
+                .content(request.getMessage())
+                .imageUrl(imageUrl)
+                .isPublic(request.getIsPublic() != null ? request.getIsPublic() : true)
+                .isGift(true)
+                .build();
+        Card savedCard = cardRepository.save(card);
+
+        // 받는 친구의 코인 +1 (친구가 코인을 나눠주는 개념)
+        memberCoinRepository.findByMemberIdAndCoinId(receiverId, coin.getId())
+                .ifPresentOrElse(
+                        mc -> { mc.addOneCoin(); memberCoinRepository.save(mc); },
+                        () -> memberCoinRepository.save(MemberCoin.createWithOneCoin(receiverId, coin.getId()))
+                );
+
+        log.info("Friend card sent: sender={}, receiver={}, coinId={}, cardId={}",
+                sender.getId(), receiverId, coin.getId(), savedCard.getId());
         return convertToCardResponse(savedCard, List.of(keyword));
     }
 

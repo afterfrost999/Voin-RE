@@ -5,10 +5,12 @@ import { useEffect, useState } from 'react';
 
 // API 응답 타입 정의
 interface KeywordData {
+    id: number;
     name: string;
     description: string;
     coinName: string;
     fullInfo: string;
+    coin?: { id: number; name: string };
 }
 
 interface ApiResponse {
@@ -52,7 +54,9 @@ export default function CaseReviewCategory() {
             strengthName: selectedKeyword.name,
             strengthDescription: selectedKeyword.description,
             fullDescription: selectedKeyword.fullInfo,
-            coinName: selectedKeyword.coinName
+            coinName: selectedKeyword.coinName,
+            keywordId: selectedKeyword.id,          // 카드 생성에 필요
+            coinId: selectedKeyword.coin?.id,       // 카드 생성에 필요
         });
         navigate('/memories-together/advantage-result');
     };

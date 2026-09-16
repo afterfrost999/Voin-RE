@@ -24,10 +24,13 @@ interface FriendSelectListProps {
         userTag: string;
     }[];
     onFriendSelect: (friend: { id: string; name: string; profileImage?: string; userTag: string }) => void
-    navigateTo: string;
+    navigateTo?: string;
+    /** 제공되면 '완료' 시 navigateTo 대신 이 콜백을 호출(선택된 친구 전달) */
+    onComplete?: (friend: { id: string; name: string; profileImage?: string; userTag: string }) => void;
+    completing?: boolean;
 }
 
-const FriendSelectList: React.FC<FriendSelectListProps> = ({ friends, onFriendSelect, navigateTo }) => {
+const FriendSelectList: React.FC<FriendSelectListProps> = ({ friends, onFriendSelect, navigateTo, onComplete, completing = false }) => {
     const [selectedId, setSelectedId] = useState<string | null>(null);
 
     const handleSelect = (friend: typeof friends[number]) => {
@@ -64,11 +67,16 @@ const FriendSelectList: React.FC<FriendSelectListProps> = ({ friends, onFriendSe
             })}
             <div className="fixed w-full px-6 bottom-4 left-0">
                 <ActionButton
-                    buttonText="완료"
+                    buttonText={completing ? '보내는 중...' : '완료'}
                     onClick={() => {
-                        navigate(navigateTo);
+                        const selected = friends.find(f => f.id === selectedId);
+                        if (onComplete) {
+                            if (selected) onComplete(selected);
+                        } else if (navigateTo) {
+                            navigate(navigateTo);
+                        }
                     }}
-                    disabled={selectedId === null}
+                    disabled={selectedId === null || completing}
                 />
             </div>
         </ul>

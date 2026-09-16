@@ -35,3 +35,39 @@ export const saveDiaryCoin = async (params: SaveDiaryCoinParams): Promise<void> 
         throw new Error(`코인 저장 실패: ${response.status}`);
     }
 };
+
+export type SendFriendCardParams = {
+    receiverId: string;       // 받는 친구 회원 ID
+    situationContext?: string; // 상황(S1)
+    action: string;           // 행동(S2)
+    feeling?: string;         // 느낌(S3)
+    keywordId: number;        // 키워드(S4)
+    message?: string;         // 메시지(S6)
+    imageUrl?: string;        // 이미지(S6, base64)
+    isPublic?: boolean;
+};
+
+/** 친구에게 장점 카드 보내기 (받는 친구의 코인 +1) */
+export const sendFriendCard = async (params: SendFriendCardParams): Promise<void> => {
+    const token = authService.getStoredToken();
+    const response = await fetch('/api/cards/friend', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+            receiverId: params.receiverId,
+            situationContext: params.situationContext ?? '',
+            action: params.action,
+            feeling: params.feeling ?? '',
+            keywordId: params.keywordId,
+            message: params.message ?? '',
+            imageUrl: params.imageUrl ?? null,
+            isPublic: params.isPublic ?? true,
+        }),
+    });
+    if (!response.ok) {
+        throw new Error(`친구 카드 전송 실패: ${response.status}`);
+    }
+};

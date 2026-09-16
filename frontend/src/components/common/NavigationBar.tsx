@@ -16,8 +16,18 @@ const NavigationBar = () => {
 
     return (
         <div className="px-8 py-4 bg-gradient-to-b from-white/0 to-white rounded-full shadow-[0px_10px_20px_-5px_rgba(35,48,59,0.05)] outline-1 outline-offset-[-1px] outline-white/70 backdrop-blur-[50px] inline-flex justify-start items-center gap-6 overflow-hidden">
-            {/* 피드 */}
-            <button type="button" onClick={() => navigate('/feed')} className="w-11 aspect-square">
+            {/* 피드 (이미 피드면 맨 위로) */}
+            <button
+                type="button"
+                onClick={() => {
+                    if (isFeed) {
+                        document.getElementById('feed-scroll')?.scrollTo({ top: 0, behavior: 'smooth' });
+                    } else {
+                        navigate('/feed');
+                    }
+                }}
+                className="w-11 aspect-square"
+            >
                 <div className="flex justify-center">
                     <CopyIcon fill={isFeed ? ACTIVE : INACTIVE} />
                 </div>

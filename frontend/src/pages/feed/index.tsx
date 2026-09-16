@@ -7,8 +7,6 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchFeed, toggleLike, type FeedCard } from '@/services/feedService';
 
-const fmtDate = (iso?: string) => (iso ? iso.slice(0, 10).replace(/-/g, '.') : '');
-
 const Avatar = ({ src, size = 36 }: { src?: string | null; size?: number }) => {
     const [err, setErr] = useState(false);
     return (
@@ -91,11 +89,12 @@ const Feed = () => {
             <TopNavigation title="피드" caption="친구들이 모은 장점을 구경해보세요." />
 
             <div
+                id="feed-scroll"
                 ref={scrollRef}
                 onTouchStart={onTouchStart}
                 onTouchMove={onTouchMove}
                 onTouchEnd={onTouchEnd}
-                className="flex-1 w-full px-6 flex flex-col gap-4 overflow-y-auto pb-4"
+                className="flex-1 w-full px-6 overflow-y-auto pb-4"
             >
                 {/* 당겨서 새로고침 표시 */}
                 {(pullY > 0 || refreshing) && (
@@ -109,45 +108,44 @@ const Feed = () => {
                     </div>
                 )}
 
-                {cards.map((card) => (
-                    <div
-                        key={card.cardId}
-                        onClick={() => navigate(`/feed/${card.cardId}`)}
-                        className="w-full rounded-3xl bg-white shadow-[0px_10px_20px_-8px_rgba(35,48,59,0.12)] outline-1 outline-offset-[-1px] outline-white overflow-hidden cursor-pointer"
-                    >
-                        {/* 코인 색 상단 띠 */}
-                        <div className="h-1.5 w-full" style={{ backgroundColor: card.coinColor || '#55CFE5' }} />
-                        <div className="p-4 flex flex-col gap-3">
-                            {/* 작성자 */}
-                            <div className="flex items-center gap-3">
-                                <Avatar src={card.memberProfileImage} />
-                                <div className="flex flex-col">
-                                    <span className="text-[15px] font-semibold text-grey-15">{card.memberNickname}</span>
-                                    <span className="text-[12px] text-grey-60">{fmtDate(card.createdAt)}</span>
+                {/* 2열 그리드 (카드 크기 고정, 넘치면 스크롤) */}
+                <div className="grid grid-cols-2 gap-3">
+                    {cards.map((card) => (
+                        <div
+                            key={card.cardId}
+                            onClick={() => navigate(`/feed/${card.cardId}`)}
+                            className="rounded-2xl bg-white shadow-[0px_10px_20px_-8px_rgba(35,48,59,0.12)] outline-1 outline-offset-[-1px] outline-white overflow-hidden cursor-pointer flex flex-col"
+                            style={{ minHeight: 210 }}
+                        >
+                            {/* 코인 색 상단 띠 */}
+                            <div className="h-1.5 w-full shrink-0" style={{ backgroundColor: card.coinColor || '#55CFE5' }} />
+                            <div className="p-3 flex flex-col gap-2 flex-1">
+                                {/* 작성자 */}
+                                <div className="flex items-center gap-2">
+                                    <Avatar src={card.memberProfileImage} size={28} />
+                                    <span className="text-[13px] font-semibold text-grey-15 truncate">{card.memberNickname}</span>
+                                </div>
+
+                                {/* 코인 칩 + 키워드 */}
+                                <span className="self-start px-2 py-0.5 rounded-full text-[11px] font-semibold text-white" style={{ backgroundColor: card.coinColor || '#55CFE5' }}>{card.coinType}</span>
+                                <span className="text-[15px] font-semibold text-grey-15">{card.keywordName}</span>
+
+                                {/* 핵심 요약 (없으면 메시지) */}
+                                {(card.summary || card.content) && (
+                                    <span className="text-[12px] text-grey-60 line-clamp-2">{card.summary || card.content}</span>
+                                )}
+
+                                {/* 좋아요 */}
+                                <div className="mt-auto flex items-center gap-1.5 pt-1" onClick={(e) => e.stopPropagation()}>
+                                    <button onClick={() => handleLike(card.cardId)} className="inline-flex items-center gap-1.5" aria-label="좋아요">
+                                        <Heart filled={card.likedByMe} />
+                                        <span className={`text-[13px] ${card.likedByMe ? 'text-[#FF5A78]' : 'text-grey-60'}`}>{card.likeCount}</span>
+                                    </button>
                                 </div>
                             </div>
-
-                            {/* 코인/키워드 */}
-                            <div className="flex items-center gap-2">
-                                <span className="px-2.5 py-1 rounded-full text-[12px] font-semibold text-white" style={{ backgroundColor: card.coinColor || '#55CFE5' }}>{card.coinType}</span>
-                                <span className="text-[16px] font-semibold text-grey-15">{card.keywordName}</span>
-                            </div>
-
-                            {/* 핵심 한 줄 요약 (없으면 메시지) */}
-                            {(card.summary || card.content) && (
-                                <div className="text-[14px] text-grey-30 line-clamp-1">{card.summary || card.content}</div>
-                            )}
-
-                            {/* 좋아요 (카드 이동과 분리) */}
-                            <div className="flex items-center gap-1.5 pt-1" onClick={(e) => e.stopPropagation()}>
-                                <button onClick={() => handleLike(card.cardId)} className="inline-flex items-center gap-1.5" aria-label="좋아요">
-                                    <Heart filled={card.likedByMe} />
-                                    <span className={`text-[14px] ${card.likedByMe ? 'text-[#FF5A78]' : 'text-grey-60'}`}>{card.likeCount}</span>
-                                </button>
-                            </div>
                         </div>
-                    </div>
-                ))}
+                    ))}
+                </div>
             </div>
 
             <div className="w-full px-16 flex flex-col items-center justify-center pb-4 pt-2">

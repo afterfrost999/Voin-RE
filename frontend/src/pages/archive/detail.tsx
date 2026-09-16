@@ -4,7 +4,7 @@ import ActionButton from '@/components/common/ActionButton';
 
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { fetchArchive, deleteCard, hideCard, type Archive, type ArchiveCard, type ArchiveType } from '@/services/archiveService';
+import { fetchArchive, deleteCard, hideCard, setCardVisibility, type Archive, type ArchiveCard, type ArchiveType } from '@/services/archiveService';
 import { getAdvantageIcon } from '@/icons/advantageIcons';
 
 const fmtDate = (iso?: string) => (iso ? iso.slice(0, 10).replace(/-/g, '.') : '');
@@ -15,6 +15,8 @@ const ArchiveCardDetail = () => {
     const [archive, setArchive] = useState<Archive | null>(null);
     const [deleting, setDeleting] = useState(false);
     const isGiven = type === 'given';
+    const [isPublic, setIsPublic] = useState(false);
+    const [togglingVis, setTogglingVis] = useState(false);
 
     useEffect(() => {
         fetchArchive().then(setArchive).catch((e) => console.error('아카이브 조회 실패:', e));
@@ -24,6 +26,24 @@ const ArchiveCardDetail = () => {
         const list = archive?.[(type ?? 'created') as ArchiveType];
         return (list ?? []).find((c) => String(c.id) === cardId);
     }, [archive, type, cardId]);
+
+    useEffect(() => { if (card) setIsPublic(!!card.isPublic); }, [card]);
+
+    const handleToggleVisibility = async () => {
+        if (togglingVis || !card) return;
+        const next = !isPublic;
+        setIsPublic(next);
+        setTogglingVis(true);
+        try {
+            await setCardVisibility(card.id, next);
+        } catch (e) {
+            console.error(e);
+            setIsPublic(!next);
+            alert('공개 설정 변경에 실패했어요.');
+        } finally {
+            setTogglingVis(false);
+        }
+    };
 
     const handleDelete = async () => {
         if (deleting || !card) return;
@@ -128,8 +148,26 @@ const ArchiveCardDetail = () => {
                         </div>
                     )}
 
+                    {/* 공개 여부 (내가 소유한 카드만 — 친구에게 써준 카드는 친구 소유라 불가) */}
+                    {!isGiven && (
+                        <div className="w-full mt-6 flex items-center justify-between rounded-2xl bg-grey-98 p-4">
+                            <div className="flex flex-col">
+                                <span className="text-[15px] font-semibold text-grey-15">피드에 공개</span>
+                                <span className="text-[12px] text-grey-60">켜면 친구들의 피드에 이 카드가 보여요</span>
+                            </div>
+                            <button
+                                onClick={handleToggleVisibility}
+                                disabled={togglingVis}
+                                aria-label="공개 여부 토글"
+                                className={`relative w-12 h-7 rounded-full transition-colors ${isPublic ? 'bg-VB-50' : 'bg-grey-90'}`}
+                            >
+                                <span className={`absolute top-0.5 w-6 h-6 bg-white rounded-full shadow transition-all ${isPublic ? 'left-[22px]' : 'left-0.5'}`} />
+                            </button>
+                        </div>
+                    )}
+
                     {/* 삭제 (수정은 불가) */}
-                    <div className="w-full mt-8">
+                    <div className="w-full mt-6">
                         <ActionButton
                             buttonText={deleting ? (isGiven ? '숨기는 중...' : '삭제 중...') : (isGiven ? '목록에서 삭제' : '카드 삭제')}
                             onClick={handleDelete}

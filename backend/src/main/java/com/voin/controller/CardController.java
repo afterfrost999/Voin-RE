@@ -138,6 +138,16 @@ public class CardController {
     }
 
     /**
+     * 카드 좋아요 토글
+     */
+    @Operation(summary = "카드 좋아요 토글", description = "카드에 좋아요를 누르거나 취소합니다. { liked, likeCount } 반환.")
+    @PostMapping("/{cardId}/like")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> toggleLike(
+            @Parameter(description = "카드 ID") @PathVariable Long cardId) {
+        return ResponseEntity.ok(ApiResponse.success("처리되었습니다.", cardService.toggleLike(cardId)));
+    }
+
+    /**
      * 친구에게 써준 카드를 내 목록에서 숨기기 (실제 카드는 유지)
      */
     @Operation(summary = "써준 카드 목록에서 숨기기", description = "친구에게 써준 카드를 내 목록에서만 숨깁니다. 카드는 받는 친구에게 유지됩니다.")

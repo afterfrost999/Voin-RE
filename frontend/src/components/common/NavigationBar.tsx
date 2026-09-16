@@ -12,18 +12,19 @@ const NavigationBar = () => {
     const { pathname } = useLocation();
     const isHome = pathname === '/' || pathname.startsWith('/home');
     const isArchive = pathname.startsWith('/archive');
+    const isFeed = pathname.startsWith('/feed');
 
     return (
         <div className="px-8 py-4 bg-gradient-to-b from-white/0 to-white rounded-full shadow-[0px_10px_20px_-5px_rgba(35,48,59,0.05)] outline-1 outline-offset-[-1px] outline-white/70 backdrop-blur-[50px] inline-flex justify-start items-center gap-6 overflow-hidden">
-            {/* 피드 (아직 미구현) */}
-            <div className="w-11 aspect-square opacity-80">
-                <div className="flex justify-center mb-auto">
-                    <CopyIcon fill={INACTIVE} />
+            {/* 피드 */}
+            <button type="button" onClick={() => navigate('/feed')} className="w-11 aspect-square">
+                <div className="flex justify-center">
+                    <CopyIcon fill={isFeed ? ACTIVE : INACTIVE} />
                 </div>
-                <div className="w-full text-center mt-auto">
-                    <span className="text-grey-60 line-15 font-semibold text-[13px]">피드</span>
+                <div className="w-full text-center">
+                    <span className={`line-15 font-semibold text-[13px] ${isFeed ? 'text-VB-50' : 'text-grey-60'}`}>피드</span>
                 </div>
-            </div>
+            </button>
 
             {/* 홈 */}
             <button type="button" onClick={() => navigate('/home')} className="w-11 aspect-square">

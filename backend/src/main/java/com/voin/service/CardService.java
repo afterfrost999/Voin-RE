@@ -15,6 +15,8 @@ import com.voin.repository.KeywordRepository;
 import com.voin.repository.MemberRepository;
 import com.voin.repository.MemberCoinRepository;
 import com.voin.repository.FriendRepository;
+import com.voin.repository.CardLikeRepository;
+import com.voin.entity.CardLike;
 import com.voin.util.ImageUtil;
 import com.voin.dto.request.DiaryCardRequest;
 import com.voin.dto.request.FriendCardRequest;
@@ -68,6 +70,7 @@ public class CardService {
     private final MemberRepository memberRepository;
     private final MemberCoinRepository memberCoinRepository;
     private final FriendRepository friendRepository;
+    private final CardLikeRepository cardLikeRepository;
     private final ImageUtil imageUtil;
 
     public Card findById(Long cardId) {
@@ -309,6 +312,30 @@ public class CardService {
 
         cardRepository.delete(card);
         log.info("Deleted card: {} by member: {}", cardId, memberId);
+    }
+
+    /**
+     * 카드 좋아요 토글. 이미 눌렀으면 취소, 아니면 좋아요. 결과와 총 좋아요 수를 반환.
+     */
+    @Transactional
+    public Map<String, Object> toggleLike(Long cardId) {
+        UUID memberId = getCurrentMemberId();
+        if (!cardRepository.existsById(cardId)) {
+            throw new ResourceNotFoundException("Card not found with id: " + cardId);
+        }
+        boolean liked;
+        Optional<CardLike> existing = cardLikeRepository.findByMemberIdAndCardId(memberId, cardId);
+        if (existing.isPresent()) {
+            cardLikeRepository.delete(existing.get());
+            liked = false;
+        } else {
+            cardLikeRepository.save(CardLike.of(memberId, cardId));
+            liked = true;
+        }
+        Map<String, Object> result = new HashMap<>();
+        result.put("liked", liked);
+        result.put("likeCount", cardLikeRepository.countByCardId(cardId));
+        return result;
     }
 
     /**

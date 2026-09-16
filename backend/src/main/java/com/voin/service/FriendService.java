@@ -10,13 +10,18 @@ import com.voin.entity.Card;
 import com.voin.repository.FriendRepository;
 import com.voin.repository.MemberRepository;
 import com.voin.repository.CardRepository;
+import com.voin.repository.CardLikeRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -29,6 +34,7 @@ public class FriendService {
     private final FriendRepository friendRepository;
     private final MemberRepository memberRepository;
     private final CardRepository cardRepository;
+    private final CardLikeRepository cardLikeRepository;
 
     /**
      * 현재 로그인한 사용자 정보 가져오기
@@ -169,18 +175,25 @@ public class FriendService {
      * 친구들의 피드(카드) 가져오기
      */
     public List<FriendCardResponse> getFriendsFeed() {
-        String currentMemberId = SecurityContextHolder.getContext().getAuthentication().getName();
-        Member currentMember = memberRepository.findById(UUID.fromString(currentMemberId))
-                .orElseThrow(() -> new RuntimeException("로그인한 사용자를 찾을 수 없습니다."));
-        
-        // 수락된 친구 관계에서 친구들 목록 가져오기
+        Member currentMember = getCurrentMember();
+
         List<Member> friends = acceptedFriendsOf(currentMember);
-        
+        if (friends.isEmpty()) return List.of();
+
         // 친구들의 공개 카드만 가져오기
         List<Card> friendCards = cardRepository.findByOwnerInAndIsPublicTrueOrderByCreatedAtDesc(friends);
-        
+        if (friendCards.isEmpty()) return List.of();
+
+        // 좋아요 수 / 내가 누른 것 집계 (배치)
+        List<Long> ids = friendCards.stream().map(Card::getId).collect(Collectors.toList());
+        Map<Long, Long> countMap = new HashMap<>();
+        for (Object[] row : cardLikeRepository.countByCardIds(ids)) {
+            countMap.put((Long) row[0], (Long) row[1]);
+        }
+        Set<Long> myLiked = new HashSet<>(cardLikeRepository.findLikedCardIds(currentMember.getId(), ids));
+
         return friendCards.stream()
-                .map(this::convertToFriendCardResponse)
+                .map(c -> convertToFriendCardResponse(c, countMap.getOrDefault(c.getId(), 0L), myLiked.contains(c.getId())))
                 .collect(Collectors.toList());
     }
 
@@ -200,15 +213,29 @@ public class FriendService {
     }
 
     /**
-     * Card 엔티티를 FriendCardResponse DTO로 변환
+     * Card 엔티티를 FriendCardResponse DTO로 변환 (좋아요 정보 포함)
      */
-    private FriendCardResponse convertToFriendCardResponse(Card card) {
+    private FriendCardResponse convertToFriendCardResponse(Card card, long likeCount, boolean likedByMe) {
+        String coinName = null, coinColor = null, keywordName = null;
+        if (card.getKeyword() != null) {
+            keywordName = card.getKeyword().getName();
+            if (card.getKeyword().getCoin() != null) {
+                coinName = card.getKeyword().getCoin().getName();
+                coinColor = card.getKeyword().getCoin().getColor();
+            }
+        }
         return FriendCardResponse.builder()
                 .cardId(card.getId())
                 .memberId(card.getOwner().getId().toString())
                 .memberNickname(card.getOwner().getNickname())
+                .memberProfileImage(card.getOwner().getProfileImage())
                 .content(card.getContent())
-                .coinType(card.getCoinName())
+                .coinType(coinName)
+                .coinColor(coinColor)
+                .keywordName(keywordName)
+                .imageUrl(card.getImageUrl())
+                .likeCount(likeCount)
+                .likedByMe(likedByMe)
                 .createdAt(card.getCreatedAt())
                 .build();
     }

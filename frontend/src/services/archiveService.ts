@@ -59,6 +59,16 @@ export const hideCard = async (cardId: number): Promise<void> => {
     if (!res.ok) throw new Error(`목록에서 숨기기 실패: ${res.status}`);
 };
 
+/** 카드 공개/비공개 설정 (소유자만). 공개하면 친구 피드에 노출됨 */
+export const setCardVisibility = async (cardId: number, isPublic: boolean): Promise<void> => {
+    const res = await fetch(`/api/cards/${cardId}/visibility`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', ...authHeader() },
+        body: JSON.stringify({ isPublic }),
+    });
+    if (!res.ok) throw new Error(`공개 설정 변경 실패: ${res.status}`);
+};
+
 /** 카드 목록을 코인(카테고리)별로 그룹핑 */
 export const groupByCoin = (cards: ArchiveCard[]) => {
     const groups = new Map<number, { coin: ArchiveCoin; cards: ArchiveCard[] }>();

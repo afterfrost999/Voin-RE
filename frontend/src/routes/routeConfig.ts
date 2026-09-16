@@ -36,6 +36,7 @@ import MemoriesTogetherFinalResult from '@/pages/findCoin/memories-together/writ
 import Login from "@/pages/login";
 import MyInfo from '@/pages/myInfo/index';
 import Friends from '@/pages/friends/index';
+import Feed from '@/pages/feed/index';
 import ArchiveHome from '@/pages/archive/index';
 import ArchiveCategories from '@/pages/archive/categories';
 import ArchiveCardList from '@/pages/archive/cards';
@@ -66,6 +67,7 @@ export const routes: RouteConfig[] = [
     { path: '/home', component: Home, isProtected: true },
     { path: '/my-info', component: MyInfo, isProtected: true },
     { path: '/friends', component: Friends, isProtected: true },
+    { path: '/feed', component: Feed, isProtected: true },
     { path: '/notification', component: Notification, isProtected: true },
 
     // archive

@@ -30,12 +30,14 @@ const AiClassify = ({ nextPath }: AiClassifyProps) => {
                     throw new Error("분류된 장점 정보를 찾을 수 없습니다.");
                 }
 
+                // caseName(상황 맥락)은 앞 단계(예: 함께한 추억 S1)에서 설정됐다면 보존한다.
+                const existingCaseName = useActivityStore.getState().data.caseName;
                 setActivityData({
                     ...classificationResult,
                     strengthDescription: keywordData.description,
                     fullDescription: `코인 설명: ${categoryData.description}`, // API 응답에 fullDescription이 없으므로 임시 처리
                     coinName: categoryData.name,
-                    caseName: '오늘의 일기',
+                    caseName: existingCaseName ?? '오늘의 일기',
                     coinId: categoryData.id,       // 저장(코인 획득) 시 사용
                     keywordId: keywordData.id,     // 저장(코인 획득) 시 사용
                 });

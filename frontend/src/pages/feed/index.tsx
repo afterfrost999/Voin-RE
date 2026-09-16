@@ -38,6 +38,17 @@ const Feed = () => {
     const [pullY, setPullY] = useState(0);
     const [refreshing, setRefreshing] = useState(false);
 
+    // 스크롤 내리면 캡션 접기, 올리면 다시 펼치기
+    const [captionVisible, setCaptionVisible] = useState(true);
+    const lastScroll = useRef(0);
+    const onScroll = () => {
+        const st = scrollRef.current?.scrollTop ?? 0;
+        if (st <= 4) setCaptionVisible(true);
+        else if (st > lastScroll.current + 3) setCaptionVisible(false);
+        else if (st < lastScroll.current - 3) setCaptionVisible(true);
+        lastScroll.current = st;
+    };
+
     const load = () => fetchFeed().then(setCards).catch((e) => console.error('피드 조회 실패:', e));
 
     useEffect(() => {
@@ -86,15 +97,24 @@ const Feed = () => {
 
     return (
         <div className="w-full h-full flex flex-col">
-            <TopNavigation title="피드" caption="친구들이 모은 장점을 구경해보세요." />
+            <TopNavigation title="피드" />
+
+            {/* 스크롤에 따라 부드럽게 접히는 캡션 */}
+            <div
+                className="px-6 -mt-4 overflow-hidden transition-all duration-300 ease-out"
+                style={{ maxHeight: captionVisible ? 36 : 0, opacity: captionVisible ? 1 : 0 }}
+            >
+                <span className="body-n text-grey-70">친구들이 모은 장점을 구경해보세요.</span>
+            </div>
 
             <div
                 id="feed-scroll"
                 ref={scrollRef}
+                onScroll={onScroll}
                 onTouchStart={onTouchStart}
                 onTouchMove={onTouchMove}
                 onTouchEnd={onTouchEnd}
-                className="flex-1 w-full px-6 overflow-y-auto pb-4"
+                className="flex-1 w-full px-6 overflow-y-auto pb-4 pt-2"
             >
                 {/* 당겨서 새로고침 표시 */}
                 {(pullY > 0 || refreshing) && (

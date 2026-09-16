@@ -68,7 +68,7 @@ const AdvantageResultPage = () => {
                     {/* TODO: 다음 단계로 버튼 추가 */}
                     <ActionButton
                         buttonText='다음'
-                        onClick={() => navigate('/todays-diary/comment-and-image')}
+                        onClick={() => navigate('/memories-together/comment-and-image')}
                         disabled={!activityData}
                     />
                 </div>

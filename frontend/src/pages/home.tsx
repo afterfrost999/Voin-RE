@@ -145,13 +145,13 @@ const Home = () => {
                 <div className='ml-auto h-full inline-flex items-center gap-2'>
                     <Link
                         to="/friends"
-                        className="px-3 py-1 text-sm text-white/80 hover:text-white border border-white/30 rounded-full hover:bg-white/10"
+                        className="px-3 py-1 text-sm text-white hover:text-white border border-white/60 rounded-full bg-white/10 hover:bg-white/20"
                     >
                         친구
                     </Link>
                     <button
                         onClick={handleLogout}
-                        className="px-3 py-1 text-sm text-white/80 hover:text-white border border-white/30 rounded-full hover:bg-white/10"
+                        className="px-3 py-1 text-sm text-white hover:text-white border border-white/60 rounded-full bg-white/10 hover:bg-white/20"
                     >
                         로그아웃
                     </button>

@@ -14,8 +14,14 @@ const ArchiveCategories = () => {
         fetchArchive().then(setArchive).catch((e) => console.error('아카이브 조회 실패:', e));
     }, []);
 
-    const title = type === 'received' ? '타인이 작성한 카드' : '내가 작성한 카드';
-    const cards = type === 'received' ? archive?.received : archive?.created;
+    const titleMap: Record<ArchiveType, string> = {
+        created: '내가 작성한 카드',
+        given: '친구에게 써준 카드',
+        received: '타인이 작성한 카드',
+    };
+    const t = (type ?? 'created') as ArchiveType;
+    const title = titleMap[t];
+    const cards = archive?.[t];
     const groups = useMemo(() => (cards ? groupByCoin(cards) : []), [cards]);
 
     return (

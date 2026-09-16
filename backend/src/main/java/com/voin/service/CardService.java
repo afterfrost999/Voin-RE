@@ -133,17 +133,26 @@ public class CardService {
      */
     public Map<String, Object> getArchive() {
         Member me = getCurrentMember();
+        List<Card> myCards = cardRepository.findByCreatorOrderByCreatedAtDesc(me);
 
-        List<Map<String, Object>> created = cardRepository.findByCreatorOrderByCreatedAtDesc(me)
-                .stream().map(this::toCardData).collect(Collectors.toList());
+        // 내가 나 자신에 대해 만든 카드 (자기 장점)
+        List<Map<String, Object>> created = myCards.stream()
+                .filter(c -> c.getTargetMember() != null && c.getTargetMember().getId().equals(me.getId()))
+                .map(this::toCardData).collect(Collectors.toList());
 
+        // 내가 친구에게 써준 카드 (대상이 내가 아님)
+        List<Map<String, Object>> given = myCards.stream()
+                .filter(c -> c.getTargetMember() == null || !c.getTargetMember().getId().equals(me.getId()))
+                .map(this::toCardData).collect(Collectors.toList());
+
+        // 타인이 나에게 써준 카드 (내가 소유하지만 작성자가 남)
         List<Map<String, Object>> received = cardRepository.findByOwnerOrderByCreatedAtDesc(me).stream()
                 .filter(c -> c.getCreator() == null || !c.getCreator().getId().equals(me.getId()))
-                .map(this::toCardData)
-                .collect(Collectors.toList());
+                .map(this::toCardData).collect(Collectors.toList());
 
         Map<String, Object> result = new HashMap<>();
         result.put("created", created);
+        result.put("given", given);
         result.put("received", received);
         return result;
     }

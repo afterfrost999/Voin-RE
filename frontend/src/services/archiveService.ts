@@ -23,8 +23,8 @@ export type ArchiveCard = {
     keyword?: ArchiveKeyword;
     story?: ArchiveStory;
 };
-export type Archive = { created: ArchiveCard[]; received: ArchiveCard[] };
-export type ArchiveType = 'created' | 'received';
+export type Archive = { created: ArchiveCard[]; given: ArchiveCard[]; received: ArchiveCard[] };
+export type ArchiveType = 'created' | 'given' | 'received';
 
 const authHeader = (): Record<string, string> => {
     const token = authService.getStoredToken();

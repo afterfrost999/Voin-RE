@@ -20,7 +20,7 @@ const ArchiveCardDetail = () => {
     }, []);
 
     const card: ArchiveCard | undefined = useMemo(() => {
-        const list = type === 'received' ? archive?.received : archive?.created;
+        const list = archive?.[(type ?? 'created') as ArchiveType];
         return (list ?? []).find((c) => String(c.id) === cardId);
     }, [archive, type, cardId]);
 

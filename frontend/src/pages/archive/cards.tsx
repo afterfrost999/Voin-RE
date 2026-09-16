@@ -16,7 +16,7 @@ const ArchiveCardList = () => {
         fetchArchive().then(setArchive).catch((e) => console.error('아카이브 조회 실패:', e));
     }, []);
 
-    const list = type === 'received' ? archive?.received : archive?.created;
+    const list = archive?.[(type ?? 'created') as ArchiveType];
     const cards = useMemo(
         () => (list ?? []).filter((c) => String(c.keyword?.coin?.id) === coinId),
         [list, coinId]

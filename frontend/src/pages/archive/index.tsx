@@ -20,6 +20,7 @@ const ArchiveHome = () => {
     }, []);
 
     const createdCount = archive?.created.length ?? 0;
+    const givenCount = archive?.given.length ?? 0;
     const receivedCount = archive?.received.length ?? 0;
 
     return (
@@ -33,6 +34,14 @@ const ArchiveHome = () => {
                         <span className="text-[13px] font-medium text-grey-60 mt-1">스스로 찾은 나의 장점</span>
                     </div>
                     <span className="text-[18px] font-semibold text-VB-50">{createdCount}개</span>
+                </button>
+
+                <button className={cardClass} onClick={() => navigate('/archive/given')}>
+                    <div className="flex flex-col items-start">
+                        <span className="text-[16px] font-semibold line-14 text-grey-30">친구에게 써준 카드</span>
+                        <span className="text-[13px] font-medium text-grey-60 mt-1">내가 찾아준 친구의 장점</span>
+                    </div>
+                    <span className="text-[18px] font-semibold text-VB-50">{givenCount}개</span>
                 </button>
 
                 <button className={cardClass} onClick={() => navigate('/archive/received')}>
